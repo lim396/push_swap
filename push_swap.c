@@ -2,6 +2,7 @@
 # include <stdlib.h>
 # include <stddef.h>
 # include <stdio.h>
+# include <stdbool.h>
 
 typedef struct s_list	t_list;
 struct s_list
@@ -10,6 +11,11 @@ struct s_list
 	t_list	*next;
 	int		val;
 };
+
+bool    is_only_sentinel(t_list *stack)
+{   
+    return (stack->next == stack && stack->prev == stack);
+}
 
 void	print_arry(int *arry, int size)
 {
@@ -22,12 +28,16 @@ void	print_arry(int *arry, int size)
 void	print_list(t_list *stack, int stack_size)
 {
 	int i = 0;
-	while (i < stack_size + 1)
+	t_list	*sentinel;
+
+	sentinel = stack;
+	while (stack->next != sentinel)
 	{
 		printf("elem %d %d\n", i, stack->val);
 		stack = stack->next;
 		i++;
 	}
+	printf("elem %d %d\n", i, stack->val);
 	printf("\n");	
 	printf("\n");
 }
@@ -136,21 +146,34 @@ void	coordinate_compression(int *arry, int size)
 		}
 		i++;
 	}
-	printf("compress arry\n");
-	print_arry(arry, size);
+//	printf("compress arry\n");
+//	print_arry(arry, size);
 }
 
-t_list	*new_sentinel()
-{
-	t_list	*node;
+//t_list	*new_sentinel()
+//{
+//	t_list	*node;
+//
+//	node = (t_list *)malloc(sizeof(t_list));
+//	if (node == NULL)
+//		return (NULL);
+//	node->prev = NULL; //will check
+//	node->next = NULL; // NULL is bad?
+//	node->val = -1;
+//	return (node);
+//}
 
-	node = (t_list *)malloc(sizeof(t_list));
-	if (node == NULL)
-		return (NULL);
-	node->prev = NULL; //will check
-	node->next = NULL;
-	node->val = -1;
-	return (node);
+t_list  *new_sentinel()
+{
+    t_list  *node;
+
+    node = (t_list *)malloc(sizeof(t_list));
+    if (node == NULL)
+        return (NULL);
+    node->prev = node; //will check
+    node->next = node;
+    node->val = -1;
+    return (node);
 }
 
 t_list	*new_node(int val)
@@ -166,23 +189,44 @@ t_list	*new_node(int val)
 	return (node);
 }
 
-void	add_node_to_list(t_list *sentinel, t_list *node)
-{
-	t_list	*head_next; //because sentinel->next->next is round
+//void	add_node_to_list(t_list *sentinel, t_list *node)
+//{
+//	t_list	*head_next; //because sentinel->next->next is round
+//
+//	if (sentinel->prev == NULL && sentinel->next == NULL)
+//	{
+//		sentinel->prev = node;
+//		sentinel->next = node;
+//		node->prev = sentinel;
+//		node->next = sentinel;
+//		return ;
+//	}
+//	head_next = sentinel->next;
+//	sentinel->next = node; // next only because put in from front
+//	head_next->prev = node; //prev only because put in from front
+//	node->prev = sentinel;
+//	node->next = head_next;
+//}
 
-	if (sentinel->prev == NULL && sentinel->next == NULL)
-	{
-		sentinel->prev = node;
-		sentinel->next = node;
-		node->prev = sentinel;
-		node->next = sentinel;
-	}
-	head_next = sentinel->next;
-	sentinel->next = node; // next only because put in from front
-	head_next->prev = node; //prev only because put in from front
-	node->prev = sentinel;
-	node->next = head_next;
+void    add_node_to_list(t_list *sentinel, t_list *node)
+{
+    t_list  *head_next; //because sentinel->next->next is round
+
+    if (is_only_sentinel(sentinel))
+    {
+        sentinel->prev = node;
+        sentinel->next = node;
+        node->prev = sentinel;
+        node->next = sentinel;
+        return ;
+    }
+    head_next = sentinel->next;
+    sentinel->next = node; // next only because put in from front
+    head_next->prev = node; //prev only because put in from front
+    node->prev = sentinel;
+    node->next = head_next;
 }
+
 
 t_list	*create_stacklist(int *arry, int size)
 {
@@ -220,12 +264,12 @@ void	swap(t_list *stack, int prev_index) //are changed two elm
 	t_list	*prev_tmp;
 	
 	// cut func find_prev_changed_pos and find_next_prev_changed_pos
-	if (prev_index == 0) // -1 is sentinel
+	if (prev_index == 0) // 0 is sentinel
 	{
 		prev_changed = stack;
 		next_changed = stack->next;
 	}
-	if (prev_index == 1) // 0 is head
+	if (prev_index == 1) // 1 is head
 	{
 		prev_changed = stack->next;
 		next_changed = stack->next->next;
@@ -249,12 +293,11 @@ void	swap(t_list *stack, int prev_index) //are changed two elm
 
 void	sa(t_list *stack)
 {
-	t_list	*sentinel;
-	t_list	*first;
-	t_list	*second;
-	t_list	*third;
+	if (stack->next == stack->prev || is_only_sentinel(stack))
+        return ;
 	
 	swap(stack, 1);
+	printf("sa\n");
 //	sentinel = stack;
 //	first = stack->next;
 //	second = stack->next->next;
@@ -275,12 +318,19 @@ void	sa(t_list *stack)
 
 void	sb(t_list *stack)
 {
+	if (stack->next == stack->prev || is_only_sentinel(stack))
+        return ;
 	swap(stack, 1);
+	printf("sb\n");
+	//printf("sb_head %d\n", stack->next->val);
 }
 
 void	ra(t_list *stack)
 {	
+	if (stack->next == stack->prev || is_only_sentinel(stack))
+        return ;
 	swap(stack, 0); // 0 is top
+	printf("ra\n");
 	//t_list	*sentinel;
 	//t_list	*first;
 	//t_list	*second;
@@ -298,53 +348,121 @@ void	ra(t_list *stack)
 
 void	rb(t_list *stack)
 {
+	if (stack->next == stack->prev || is_only_sentinel(stack))
+        return ;
 	swap(stack, 0); // 0 is sentinel
+	printf("rb\n");
 }
 
 void	rra(t_list *stack)
 {
+	if (stack->next == stack->prev || is_only_sentinel(stack))
+        return ;
 	swap(stack, -1); // -1 is bottom
+	printf("rra\n");
 }
 
 void	rrb(t_list *stack)
 {
+	if (stack->next == stack->prev || is_only_sentinel(stack))
+        return ;
 	swap(stack, -1);
+	printf("rrb\n");
 }
 
-t_list	*pop(t_list *stack)
-{
-	t_list	*pop_node;
+//t_list	*pop(t_list *stack)
+//{
+//	t_list	*pop_node;
+//
+//	pop_node = stack->next;
+//	stack->next = stack->next->next;
+//	pop_node->next->prev = stack;
+//	pop_node->next = NULL;
+//	pop_node->prev = NULL;
+//	//if (stack == stack->next)
+//	//{
+//	//	stack->next = NULL;
+//	//	stack->prev = NULL;
+//	//}
+//	return (pop_node);
+//}
 
-	pop_node = stack->next;
-	stack->next = stack->next->next;
-	pop_node->next->prev = stack;
-	pop_node->next = NULL;
-	pop_node->prev = NULL;
-	return (pop_node);
-}
-
-void	push(t_list *pushed_stack, t_list *pushed_node)
-{
-	add_node_to_list(pushed_stack, pushed_node);
-}
-
-void	pa(t_list *stack_a, t_list *stack_b)
-{
-	t_list	*pop_node;
-
-	pop_node = pop(stack_b);
-	push(stack_a, pop_node);
-}
-
-void	pb(t_list *stack_a, t_list *stack_b)
-{
-	t_list	*pop_node;
-
-	pop_node = pop(stack_a);
-	push(stack_b, pop_node);
-}
+//void	push(t_list *pushed_stack, t_list *pushed_node)
+//{
+//	add_node_to_list(pushed_stack, pushed_node);
+//	//printf("b_head %d\n", pushed_stack->next->val);
+//}
+//
+//void	pa(t_list *stack_b, t_list *stack_a)
+//{
+//	t_list	*pop_node;
+//
+//	pop_node = pop(stack_b);
+//	push(stack_a, pop_node);
+//	//printf("a_head %d\n", stack_a->next->val);
+//}
+//
+//void	pb(t_list *stack_a, t_list *stack_b)
+//{
+//	t_list	*pop_node;
+//
+//	pop_node = pop(stack_a);
+//	push(stack_b, pop_node);
+//}
 //
 //
+
+void    add_stack_top(t_list *stack, int val)
+{
+    t_list  *node;
+
+    node = new_node(val);
+    add_node_to_list(stack, node);
+}
+
+void    del_stack_top(t_list *stack)
+{
+    t_list  *top;
+    t_list  *top_next;
+        
+
+    top = stack->next;
+    if (stack->prev == stack->next)
+    {   
+        stack->prev = stack;
+        stack->next = stack;
+        free(top);
+        return ;
+    }
+    top_next = top->next;
+    stack->next = top_next;
+    top_next->prev = stack;
+    free(top);
+}
+
+void    push(t_list *stack_1, t_list *stack_2)
+{
+    if (is_only_sentinel(stack_2))
+        return ;
+    add_stack_top(stack_1, stack_2->next->val);
+    del_stack_top(stack_2);
+}
+
+void    pa(t_list *stack_a, t_list *stack_b)
+{
+    if (is_only_sentinel(stack_b))
+        return ;
+    push(stack_a, stack_b);
+	printf("pa\n");
+}
+
+void    pb(t_list *stack_a, t_list *stack_b)
+{
+    if (is_only_sentinel(stack_a))
+        return ;
+    push(stack_b, stack_a);
+	printf("pb\n");
+}
 
 void	less_than_three_sort(t_list *stack_a, int size)
 {
@@ -387,9 +505,9 @@ int	find_min(t_list *stack, int size)
 		if (stack->next->val <= min)
 		{
 			min = stack->next->val;
-			printf("min %d", min);
+//			printf("min %d", min);
 			min_index = i;
-			printf(" index %d\n", min_index);
+//			printf(" index %d\n", min_index);
 
 		}
 		stack = stack->next;
@@ -425,7 +543,7 @@ void	less_than_five_sort(t_list *stack_a, t_list *stack_b, int size)
 			}
 		}
 		pb(stack_a, stack_b);
-		print_list(stack_a, size);
+//		print_list(stack_a, size);
 		i++;
 		size--;
 	}
@@ -434,58 +552,35 @@ void	less_than_five_sort(t_list *stack_a, t_list *stack_b, int size)
 		pa(stack_a, stack_b);
 }
 
-//void	medium_rare_sort()
-//{}
 
 
-int	get_front_index(t_list *stack, int num, int median)
+int	get_front_index(t_list *stack, int chunk_min)
 {
 	int	i;
-	static int	min = -1;
-	static int	max = -1;
+	int	chunk_max;
 	t_list *sentinel;
 
 	sentinel = stack;
 	i = 0;
-	if (num == 0)
-	{
-		min = median - 10;
-		max = median + 9;
-	}
-	else
-	{
-		min = min - 10;
-		max = max + 10;
-	}
-//	if (num == 0)
+	chunk_max = chunk_min + 19;
+//	if (num == 0 && median > 9)
 //	{
-//		min = 40;
-//		max = 59;
+//		min = median - 10;
+//		max = median + 9;
 //	}
-//	if (num == 1)
-//	{
-//		min = 30;
-//		max = 69;
-//	}
-//	if (num == 2)
-//	{
-//		min = 20;
-//		max = 79;
-//	}
-//	if (num == 3)
-//	{
-//		min = 10;
-//		max = 89;
-//	}
-//	if (num == 4)
+//	else if (num == 0)
 //	{
 //		min = 0;
-//		max = 99;
+//		max = median + 9;
+//	}
+//	else if (min > 9)
+//	{
+//		min = min - 10;
+//		max = max + 10;
 //	}
 	while (stack->next != sentinel)
 	{
-		if ((min <= stack->next->val &&  stack->next->val <= min + 9)
-				|| (max - 9 <= stack->next->val &&  stack->next->val <= max))
+		if (chunk_min <= stack->next->val && stack->next->val <= chunk_max)
 			break ;
 		i++;
 		stack = stack->next;
@@ -495,115 +590,77 @@ int	get_front_index(t_list *stack, int num, int median)
 	return (i);
 }
 
-int	find_from_top(t_list *stack, int chunk_num, int median)
+int	find_from_top(t_list *stack, int chunk_min)
 {
 	int	index;
 
-	index = get_front_index(stack, chunk_num, median);
-//	if (chunk_number == 0)
-//		index = get_chunk_index(0);
-//	if (chunk_number == 1)
-//		index = get_chunk_index(1);
-//	if (chunk_number == 2)
-//		index = get_chunk_index(2);
-//	if (chunk_number == 3)
-//		index = get_chunk_index(3);
-//	if (chunk_number == 4)
-//		index = get_chunk_index(4);
+	index = get_front_index(stack, chunk_min);
 	return (index);
 }
 
-int	get_back_index(t_list *stack, int num, int median)
+int	get_back_index(t_list *stack, int chunk_min)
 {
 	int	i;
-	static int	min = -1;
-	static int	max = -1;
+	int	chunk_max;
 	t_list *sentinel;
 
 	sentinel = stack;
 	i = 0;
-	if (num == 0)
-	{
-		min = median - 10;
-		max = median + 9;
-	}
-	else
-	{
-		min = min - 10;
-		max = max + 10;
-	}
-//	if (num == 0)
+	chunk_max = chunk_min + 19;
+//	if (num == 0 && median > 9)
 //	{
-//		min = 40;
-//		max = 59;
+//		min = median - 10;
+//		max = median + 9;
 //	}
-//	if (num == 1)
-//	{
-//		min = 30;
-//		max = 69;
-//	}
-//	if (num == 2)
-//	{
-//		min = 20;
-//		max = 79;
-//	}
-//	if (num == 3)
-//	{
-//		min = 10;
-//		max = 89;
-//	}
-//	if (num == 4)
+//	else if (num == 0)
 //	{
 //		min = 0;
-//		max = 99;
+//		max = median + 9;
+//	}
+//	else if (min > 9)
+//	{
+//		min = min - 10;
+//		max = max + 10;
 //	}
 	while (stack->prev != sentinel)
 	{
-		if ((min <= stack->prev->val &&  stack->prev->val <= min + 9)
-				|| (max - 9 <= stack->prev->val &&  stack->prev->val <= max))
+		
+		if (chunk_min <= stack->prev->val && stack->prev->val <= chunk_max)
 			break ;
 		i++;
 		stack = stack->prev;
 	}
 	//while (stack != sentinel)
 	//	stack = stack->prev;
-	return (i);
+	return (i + 1);
 }
 
-int	find_from_bottom(t_list *stack, int chunk_num, int median)
+
+int	find_from_bottom(t_list *stack, int chunk_min)
 {
 	int	index;
 
-	index = get_back_index(stack, chunk_num, median);
-//	if (chunk_number == 0)
-//		index = get_chunk_index(0);
-//	if (chunk_number == 1)
-//		index = get_chunk_index(1);
-//	if (chunk_number == 2)
-//		index = get_chunk_index(2);
-//	if (chunk_number == 3)
-//		index = get_chunk_index(3);
-//	if (chunk_number == 4)
-//		index = get_chunk_index(4);
+	index = get_back_index(stack, chunk_min);
 	return (index);
 }
 
-void	push_chunk(t_list *stack_a, t_list *stack_b, int size)
+
+void	push_chunk(t_list *stack_a, t_list *stack_b, int size, int chunk_min)
 {
 	int	ra_index;
 	int	rra_index;
 	int	i;
-	int median;
-	int chunk_count;
-	
-	i = 0;
-	while (i < 20) //i < chunk_size
+	int	chunk_size;
+
+	i = 0; 
+	chunk_size = size - chunk_min;
+	if (chunk_size > 20)
+		chunk_size = 20;
+	while (i < chunk_size) //i < chunk_size
 	{
-		median = size / 2;
-		chunk_count = size / 20;
-		ra_index = find_from_top(stack_a, chunk_count, median);
-		rra_index = find_from_bottom(stack_a, chunk_count, median);
-		if (ra_index < rra_index)
+		ra_index = find_from_top(stack_a, chunk_min);
+		rra_index = find_from_bottom(stack_a, chunk_min);
+		if (ra_index <= rra_index)
 		{
 			while (ra_index--) // cut func repeat_ra
 				ra(stack_a);
@@ -613,12 +670,18 @@ void	push_chunk(t_list *stack_a, t_list *stack_b, int size)
 			while (rra_index--) // cut func_repeat_rra
 				rra(stack_a);
 		}
-		pb(stack_b, stack_a);
-		if (stack_b->next->val < median)
+		//printf("stack_a %d\n", stack_a->next->val);
+		pb(stack_a, stack_b);
+		//printf("stack_a %d\n", stack_a->next->val);
+		//printf("stack_b %d\n", stack_b->next->val);
+		if (stack_b->next->val > chunk_min + 10)
 			rb(stack_b);
 		if (stack_b->next->val < stack_b->next->next->val)
 			sb(stack_b);
+		i++;
 	}
+	//print_list(stack_a, size);
+	//print_list(stack_b, size);
 	//while ()
 	//{
 	//	measure_now_size();
@@ -626,7 +689,7 @@ void	push_chunk(t_list *stack_a, t_list *stack_b, int size)
 	//}
 }
 
-int	get_max_val_index(t_list *stack, int size)
+int	front_max_val_index(t_list *stack, int size)
 {
 	int	i;
 	t_list *sentinel;
@@ -645,43 +708,85 @@ int	get_max_val_index(t_list *stack, int size)
 	return (i);
 }
 
+int	back_max_val_index(t_list *stack, int size)
+{
+	int	i;
+	t_list *sentinel;
+
+	sentinel = stack;
+	i = 0;
+	while (stack->prev != sentinel)
+	{
+		if (stack->prev->val == size - 1)
+			break ;
+		stack = stack->prev;
+		i++;
+	}
+	//while (stack != sentinel)
+	//	stack = stack->next;
+	return (i + 1);	
+}
+
+int	top_near(t_list *stack, int find_val1, int find_val2, int find_val3)
+{
+	t_list	*sentinel;
+	int i;
+	int val; //test
+	sentinel = stack;
+	i = 0;
+	while (stack->next != sentinel)
+	{
+		val = stack->next->val;
+		if (stack->next->val == find_val1
+			|| stack->next->val == find_val2
+			|| stack->next->val == find_val3)
+			break ;
+		i++;
+		stack = stack->next;
+	}
+	//while (stack != sentinel)
+	//	stack = stack->next;
+	return (i);
+}
+
+int	bottom_near(t_list *stack, int find_val1, int find_val2, int find_val3)
+{
+	t_list	*sentinel;
+	int	i;
+	int	val;
+	sentinel = stack;
+	i = 0;
+	while (stack->prev != sentinel)
+	{
+		val = stack->next->val;
+		if (stack->prev->val == find_val1
+			|| stack->prev->val == find_val2
+			|| stack->prev->val == find_val3)
+			break ;
+		i++;
+		stack = stack->prev;
+	}
+	//while (stack != sentinel)
+	//	stack = stack->prev;
+	return (i + 1);
+}
+
 void	push_from_bigger(t_list *stack_a, t_list *stack_b, int size)
 {
 	int	a_top_val;     // cut func get_near_index
 	int a_bottom_val;  // cut func get_near_index
 	int	rb_index;
 	int	rrb_index;
-	int sa_flag;
-	int	rra_flag;
+	int sa_flag = 0;
+	int	rra_flag = 0;
+	int i; // cut func get_near_index
 
-	rb_index = get_max_val_index(stack_b, size);
-	while (rb_index--)
-		rb(stack_b);
-	pa(stack_a, stack_b);
-
-	//if ra_flag > 0 && sa_flag == 0  3args bottom_val - 1 and a_top_val - 1 and a_top_val -2
-	//if sa_flag == 1 2args a_top_val + 1 and a_top_val - 1 and -1(void)
-	//while (i < stack_size)
-
-	// cut func get_near_index
-	a_top_val = stack_a->next->val;
-	if (rra_flag > 0 && sa_flag == 0)
-	{
-		rb_index = top_near(stack_b, a_bottom_val - 1, a_top_val - 1, a_top_val - 2);
-		rrb_index = bottom_near(stack_b, a_bottom_val - 1, a_top_val - 1, a_top_val - 2);
-	}
-	if (sa_flag == 1)
-	{
-		rb_index = top_near(stack_b, a_top_val + 1, a_top_val - 1, -1);
-		rrb_index = bottom_near(stack_b, a_top_val + 1, a_top_val - 1, -1);
-	}
-	else
-		rb_index = top_near(stack_b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
-		rrb_index = bottom_near(stack_b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
-	// so far
-
-	if (rb_index > rrb_index)
-	{
+	rb_index = front_max_val_index(stack_b, size);
+	rrb_index = back_max_val_index(stack_b, size);
+	//printf("rb_index %d\n", rb_index);
+	//printf("%d\n", rb_index);
+	if (rb_index <= rrb_index)
+	{	
 		while (rb_index--)
 			rb(stack_b);
 	}
@@ -690,40 +795,141 @@ void	push_from_bigger(t_list *stack_a, t_list *stack_b, int size)
 		while (rrb_index--)
 			rrb(stack_b);
 	}
+	//printf("b_head %d\n", stack_b->next->val);
 	pa(stack_a, stack_b);
-	// cut func receive_node;
-	if (stack_a->next->next->val - stack_a->next->val == 2)
-		sa_flag = 1;
-	if (stack_a->next->next->val - stack_a->next->val < 0)
+	//printf("a_head %d\n", stack_a->next->val);
+	//if ra_flag > 0 && sa_flag == 0  3args bottom_val - 1 and a_top_val - 1 and a_top_val -2
+	//if sa_flag == 1 2args a_top_val + 1 and a_top_val - 1 and -1(void)
+
+
+	// cut func get_near_index
+	i = 0;
+	while (i < size - 1)
 	{
-		sa(stack_a);
-		sa_flag = 0;
-		if (rra_flag > 0)
+		a_top_val = stack_a->next->val;
+		a_bottom_val = stack_a->prev->val;
+		//printf("a_top %d\n", a_top_val);
+		if (rra_flag == 1 && sa_flag == 0)
 		{
-			while (rra_flag--)
-				rra(stack_a);
+//			printf("sa_flag %d\n", sa_flag);
+//			printf("rra_flag %d\n", rra_flag);
+//			printf("a_bottom-1 %d\n", a_bottom_val - 1);
+//			printf("a_top-1 %d\n", a_top_val - 1);
+//			printf("a_top-2 %d\n", a_top_val - 2);
+			rb_index = top_near(stack_b, a_top_val - 1, a_top_val - 2, -3);
+			rrb_index = bottom_near(stack_b, a_top_val - 1, a_top_val - 2, -3);
 		}
-	}
-	if (stack_a->next->next->val - stack_a->next->val > 2 || sa_flag == 1)
-	{
-		ra(stack_a);
-		rra_flag += 1;
+		else if (sa_flag == 1 && rra_flag == 0)
+		{
+//			printf("sa_flag %d\n", sa_flag);
+//			printf("rra_flag %d\n", rra_flag);
+//			printf("a_top+1 %d\n", a_top_val + 1);
+//			printf("a_top-1 %d\n", a_top_val - 1);
+			rb_index = top_near(stack_b, a_top_val + 1, a_top_val - 1, -3); // last arg tmp
+			rrb_index = bottom_near(stack_b, a_top_val + 1, a_top_val - 1, -3); //eaxamination
+		}
+		else if (sa_flag == 1 && rra_flag == 1)
+		{
+			rb_index = top_near(stack_b, a_top_val + 1, -3, -3); // last arg tmp
+			rrb_index = bottom_near(stack_b, a_top_val + 1, -3, -3); //eaxamination	
+		}
+		else
+		{
+			
+//			printf("sa_flag %d\n", sa_flag);
+//			printf("rra_flag %d\n", rra_flag);
+//			printf("a_top-1 %d\n", a_top_val - 1);
+//			printf("a_top-2 %d\n", a_top_val - 2);
+//			printf("a_top-3 %d\n", a_top_val - 3);
+			rb_index = top_near(stack_b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
+			rrb_index = bottom_near(stack_b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
+		}
+		// so far
+//		printf("rb_index %d\n", rb_index);
+//		printf("rrb_index %d\n", rrb_index);
+		if (rb_index <= rrb_index)
+		{
+			while (rb_index--)
+				rb(stack_b);
+		}
+		else
+		{
+			while (rrb_index--)
+				rrb(stack_b);
+		}
+		//printf("b_head %d\n", stack_b->next->val);
+		pa(stack_a, stack_b);
+		//printf("topa %d\n", stack_a->next->val);
+		// cut func receive_node;
+		if (stack_a->next->next->val - stack_a->next->val == 2)
+			sa_flag = 1;
+		if (stack_a->next->next->val - stack_a->next->val == 1 && sa_flag == 1 && rra_flag == 0)
+		{
+			ra(stack_a);
+			rra_flag = 1;
+		}
+		if (stack_a->next->val - stack_a->prev->val == 1 && sa_flag == 0 && rra_flag == 1)
+		{
+			rra(stack_a);
+			rra_flag = 0;
+		}
+		if (stack_a->next->next->val - stack_a->next->val < 0)
+		{
+			sa(stack_a);
+			sa_flag = 0;
+			if (rra_flag > 0)
+			{
+				rra(stack_a);
+				rra_flag = 0;
+			}
+		}
+		if (stack_a->next->next->val - stack_a->next->val > 2)
+		{
+			ra(stack_a);
+			rra_flag = 1;
+		}
+		i++;
+//		if (stack_b->next->val == -1)
+//		{
+//			while (rra_flag--)
+//				rra(stack_a);
+//		}
 	}
 }
 
-void	some_sort(t_list *stack_a, t_list *stack_b, int size)
+
+void	medium_rare_sort(t_list *stack_a, t_list *stack_b, int size)
 {
-	int	i;
-	//int	chunk_size;
-	//int	median;
-	
-	//median = size / 2;
-	//chunk_size = size / 5;
-	i = 0;
-	while (i < 5) // i < stack_size / chunk_size
-		push_chunk(stack_a, stack_b, size);
+	int	min;
+
+	min = 0;
+	while (min < size)
+	{
+		push_chunk(stack_a, stack_b, size, min);
+		min += 20;
+	}
 	push_from_bigger(stack_a, stack_b, size);
 }
+
+//void	some_sort(t_list *stack_a, t_list *stack_b, int size)
+//{
+//	int	i;
+//	//int	chunk_size;
+//	//int	median;
+//	
+//	//median = size / 2;
+//	//chunk_size = size / 5;
+//	i = 0;
+//	push_chunk(stack_a, stack_b, size, i);
+//	while (i < (size / 20) - 1) // i < stack_size / chunk_size
+//	{
+//		push_chunk(stack_a, stack_b, size, i);
+//		i++;
+//	}
+//	//print_list(stack_a, size);
+//	//print_list(stack_b, size);
+//	push_from_bigger(stack_a, stack_b, size);
+//}
 
 
 
@@ -735,8 +941,9 @@ void	push_swap(t_list *stack_a, t_list *stack_b, int size)
 		less_than_three_sort(stack_a, size);
 	if (size <= 5)
 		less_than_five_sort(stack_a, stack_b, size);
-	//else
-	//	some_sort(stack_a, stack_b);
+	else
+		medium_rare_sort(stack_a, stack_b, size);
+		//some_sort(stack_a, stack_b, size);
 }
 
 int	main(int argc, char **argv)
@@ -751,15 +958,16 @@ int	main(int argc, char **argv)
 	stack_arry = create_arry(argv, stack_size);
 	if (stack_arry == NULL)
 		return (1);
-	printf("create arry\n");
-	print_arry(stack_arry, stack_size);
+//	printf("create arry\n");
+//	print_arry(stack_arry, stack_size);
 	coordinate_compression(stack_arry, stack_size);
 	stack_a = create_stacklist(stack_arry, stack_size);
-	//print_list(stack_a, stack_size);
+//	print_list(stack_a, stack_size);
 	stack_b = create_stacklist(NULL, 0);
 	push_swap(stack_a, stack_b, stack_size);
 	printf("sorted list\n");
 	print_list(stack_a, stack_size);
+//	print_list(stack_b, stack_size);
 	return (0);
 }
 	//sa(stack_a);
