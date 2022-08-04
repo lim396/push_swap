@@ -334,7 +334,33 @@ t_listack	*create_stacklist(int *arry, int size)
 //int	find_min(t_listack *stack)
 //{
 //}
-//
+
+t_listack *find_prev_changed_pos(t_listack *stack, int prev_index)
+{
+    t_listack   *prev_changed;
+
+    if (prev_index == 0) // 0 is sentinel
+        prev_changed = stack;
+    if (prev_index == 1) // 1 is head
+        prev_changed = stack->next;
+    if (prev_index == -1) // -1 is tail
+        prev_changed = stack->prev;
+    return (prev_changed);
+}
+
+t_listack *find_next_changed_pos(t_listack *stack, int prev_index)
+{
+    t_listack   *next_changed;
+
+    if (prev_index == 0) // 0 is sentinel
+        next_changed = stack->next;
+    if (prev_index == 1) // 1 is head
+        next_changed = stack->next->next;
+    if (prev_index == -1) // -1 is tail
+        next_changed = stack;
+    return (next_changed);
+}
+
 void	swap(t_listack *stack, int prev_index) //are changed two elm
 {
 	t_listack	*prev_changed;
@@ -343,21 +369,23 @@ void	swap(t_listack *stack, int prev_index) //are changed two elm
 	t_listack	*prev_tmp;
 	
 	// cut func find_prev_changed_pos and find_next_prev_changed_pos
-	if (prev_index == 0) // 0 is sentinel
-	{
-		prev_changed = stack;
-		next_changed = stack->next;
-	}
-	if (prev_index == 1) // 1 is head
-	{
-		prev_changed = stack->next;
-		next_changed = stack->next->next;
-	}
-	if (prev_index == -1) // -1 is tail
-	{
-		prev_changed = stack->prev;
-		next_changed = stack;
-	}
+	prev_changed = find_prev_changed_pos(stack, prev_index);
+	next_changed = find_next_changed_pos(stack, prev_index);
+//	if (prev_index == 0) // 0 is sentinel
+//	{
+//		prev_changed = stack;
+//		next_changed = stack->next;
+//	}
+//	if (prev_index == 1) // 1 is head
+//	{
+//		prev_changed = stack->next;
+//		next_changed = stack->next->next;
+//	}
+//	if (prev_index == -1) // -1 is tail
+//	{
+//		prev_changed = stack->prev;
+//		next_changed = stack;
+//	}
 	// cut func ? swap_helper
 	next_tmp = next_changed->next;
 	prev_changed->next = next_changed->next;
@@ -723,6 +751,17 @@ int	find_from_bottom(t_listack *stack, int chunk_min)
 	return (index);
 }
 
+void	multiple_rotate_a(t_listack *stack, int r_index)
+{
+	while (r_index--)
+		ra(stack);
+}
+
+void	multiple_reverse_rotate_a(t_listack *stack, int rr_index)
+{
+	while (rr_index--)
+		rra(stack);
+}
 
 void	push_chunk(t_listack *stack_a, t_listack *stack_b, int size, int chunk_min)
 {
@@ -740,15 +779,13 @@ void	push_chunk(t_listack *stack_a, t_listack *stack_b, int size, int chunk_min)
 		ra_index = find_from_top(stack_a, chunk_min);
 		rra_index = find_from_bottom(stack_a, chunk_min);
 		if (ra_index <= rra_index)
-		{
-			while (ra_index--) // cut func repeat_ra
-				ra(stack_a);
-		}
+			multiple_rotate_a(stack_a, ra_index);
 		else
-		{
-			while (rra_index--) // cut func_repeat_rra
-				rra(stack_a);
-		}
+			multiple_reverse_rotate_a(stack_a, rra_index);
+//		{
+//			while (rra_index--) // cut func_repeat_rra
+//				rra(stack_a);
+//		}
 		//printf("stack_a %d\n", stack_a->next->val);
 		pb(stack_a, stack_b);
 		//printf("stack_a %d\n", stack_a->next->val);
@@ -850,10 +887,107 @@ int	bottom_near(t_listack *stack, int find_val1, int find_val2, int find_val3)
 	return (i + 1);
 }
 
+int get_near_rb_index(t_listack *stack_a, t_listack *stack_b, int sa_flag, int rra_flag)
+{
+    int a_top_val;
+    int a_bottom_val;
+    int rb_index;
+
+    a_top_val = stack_a->next->val;
+    a_bottom_val = stack_a->prev->val;
+    //printf("a_top %d\n", a_top_val);
+    if (rra_flag == 1 && sa_flag == 0)
+        rb_index = top_near(stack_b, a_top_val - 1, a_top_val - 2, -3);
+    else if (sa_flag == 1 && rra_flag == 0)
+        rb_index = top_near(stack_b, a_top_val + 1, a_top_val - 1, -3); // last arg tmp
+    else if (sa_flag == 1 && rra_flag == 1)
+        rb_index = top_near(stack_b, a_top_val + 1, -3, -3); // last arg tmp
+    else
+        rb_index = top_near(stack_b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
+    return (rb_index);
+}
+
+
+int get_near_rrb_index(t_listack *stack_a, t_listack *stack_b, int sa_flag, int rra_flag)
+{
+    int a_top_val;
+    int a_bottom_val;
+    int rrb_index;
+
+    a_top_val = stack_a->next->val;
+    a_bottom_val = stack_a->prev->val;
+    //printf("a_top %d\n", a_top_val);
+    if (rra_flag == 1 && sa_flag == 0)
+        rrb_index = bottom_near(stack_b, a_top_val - 1, a_top_val - 2, -3);
+    else if (sa_flag == 1 && rra_flag == 0)
+        rrb_index = bottom_near(stack_b, a_top_val + 1, a_top_val - 1, -3); //eaxamination
+    else if (sa_flag == 1 && rra_flag == 1)
+        rrb_index = bottom_near(stack_b, a_top_val + 1, -3, -3); //eaxamination
+    else
+        rrb_index = bottom_near(stack_b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
+    return (rrb_index);
+}
+
+void	multiple_rotate_b(t_listack *stack, int r_index)
+{
+	while (r_index--)
+		rb(stack);
+}
+
+void	multiple_reverse_rotate_b(t_listack *stack, int rr_index)
+{
+	while (rr_index--)
+		rrb(stack);
+}
+
+int	rra_and_set_flag(t_listack *stack, int flag)
+{
+	rra(stack);
+	if (flag == 1)
+		flag = 0;
+	return (flag);
+}
+
+
+int	ra_and_set_flag(t_listack *stack, int flag)
+{
+	ra(stack);
+	if (flag == 0)
+		flag = 1;
+	return (flag);
+}
+
+void	receiving_process(t_listack *stack_a, int *sa_flag, int *rra_flag)
+{
+	if (stack_a->next->next->val - stack_a->next->val == 2)
+		*sa_flag = 1;
+	if (stack_a->next->next->val - stack_a->next->val == 1 && *sa_flag == 1 && *rra_flag == 0)
+		*rra_flag = ra_and_set_flag(stack_a, *rra_flag);
+	if (stack_a->next->val - stack_a->prev->val == 1 && *sa_flag == 0 && *rra_flag == 1)
+		*rra_flag = rra_and_set_flag(stack_a, *rra_flag);
+	if (stack_a->next->next->val - stack_a->next->val < 0)
+	{
+		sa(stack_a);
+		*sa_flag = 0;
+		if (*rra_flag > 0)
+			*rra_flag = rra_and_set_flag(stack_a, *rra_flag);
+	}
+	if (stack_a->next->next->val - stack_a->next->val > 2)
+		*rra_flag = ra_and_set_flag(stack_a, *rra_flag);
+}
+
+void	multiple_rb_or_rrb(t_listack *stack_b, int rb_index, int rrb_index)
+{
+	if (rb_index <= rrb_index)
+		multiple_rotate_b(stack_b, rb_index);
+	else
+		multiple_reverse_rotate_b(stack_b, rrb_index);
+}
+
 void	push_from_bigger(t_listack *stack_a, t_listack *stack_b, int size)
 {
-	int	a_top_val;     // cut func get_near_index
-	int a_bottom_val;  // cut func get_near_index
+//	int	a_top_val;     // cut func get_near_index
+//	int a_bottom_val;  // cut func get_near_index
 	int	rb_index;
 	int	rrb_index;
 	int sa_flag = 0;
@@ -864,16 +998,15 @@ void	push_from_bigger(t_listack *stack_a, t_listack *stack_b, int size)
 	rrb_index = back_max_val_index(stack_b, size);
 	//printf("rb_index %d\n", rb_index);
 	//printf("%d\n", rb_index);
-	if (rb_index <= rrb_index)
-	{	
-		while (rb_index--)
-			rb(stack_b);
-	}
-	else
-	{
-		while (rrb_index--)
-			rrb(stack_b);
-	}
+	multiple_rb_or_rrb(stack_b, rb_index, rrb_index);
+//	if (rb_index <= rrb_index)
+//		multiple_rotate_b(stack_b, rb_index);
+//	else	
+//		multiple_reverse_rotate_b(stack_b, rrb_index);
+//	{   	
+//		while (rrb_index--)
+//			rrb(stack_b);
+//	}
 	//printf("b_head %d\n", stack_b->next->val);
 	pa(stack_a, stack_b);
 	//printf("a_head %d\n", stack_a->next->val);
@@ -885,88 +1018,74 @@ void	push_from_bigger(t_listack *stack_a, t_listack *stack_b, int size)
 	i = 0;
 	while (i < size - 1)
 	{
-		a_top_val = stack_a->next->val;
-		a_bottom_val = stack_a->prev->val;
-		//printf("a_top %d\n", a_top_val);
-		if (rra_flag == 1 && sa_flag == 0)
-		{
-//			printf("sa_flag %d\n", sa_flag);
-//			printf("rra_flag %d\n", rra_flag);
-//			printf("a_bottom-1 %d\n", a_bottom_val - 1);
-//			printf("a_top-1 %d\n", a_top_val - 1);
-//			printf("a_top-2 %d\n", a_top_val - 2);
-			rb_index = top_near(stack_b, a_top_val - 1, a_top_val - 2, -3);
-			rrb_index = bottom_near(stack_b, a_top_val - 1, a_top_val - 2, -3);
-		}
-		else if (sa_flag == 1 && rra_flag == 0)
-		{
-//			printf("sa_flag %d\n", sa_flag);
-//			printf("rra_flag %d\n", rra_flag);
-//			printf("a_top+1 %d\n", a_top_val + 1);
-//			printf("a_top-1 %d\n", a_top_val - 1);
-			rb_index = top_near(stack_b, a_top_val + 1, a_top_val - 1, -3); // last arg tmp
-			rrb_index = bottom_near(stack_b, a_top_val + 1, a_top_val - 1, -3); //eaxamination
-		}
-		else if (sa_flag == 1 && rra_flag == 1)
-		{
-			rb_index = top_near(stack_b, a_top_val + 1, -3, -3); // last arg tmp
-			rrb_index = bottom_near(stack_b, a_top_val + 1, -3, -3); //eaxamination	
-		}
-		else
-		{
-			
-//			printf("sa_flag %d\n", sa_flag);
-//			printf("rra_flag %d\n", rra_flag);
-//			printf("a_top-1 %d\n", a_top_val - 1);
-//			printf("a_top-2 %d\n", a_top_val - 2);
-//			printf("a_top-3 %d\n", a_top_val - 3);
-			rb_index = top_near(stack_b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
-			rrb_index = bottom_near(stack_b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
-		}
+		rb_index = get_near_rb_index(stack_a, stack_b, sa_flag, rra_flag);
+        rrb_index = get_near_rrb_index(stack_a, stack_b, sa_flag, rra_flag);
+//		a_top_val = stack_a->next->val;
+//		a_bottom_val = stack_a->prev->val;
+//		//printf("a_top %d\n", a_top_val);
+//		if (rra_flag == 1 && sa_flag == 0)
+//		{
+////			printf("sa_flag %d\n", sa_flag);
+////			printf("rra_flag %d\n", rra_flag);
+////			printf("a_bottom-1 %d\n", a_bottom_val - 1);
+////			printf("a_top-1 %d\n", a_top_val - 1);
+////			printf("a_top-2 %d\n", a_top_val - 2);
+//			rb_index = top_near(stack_b, a_top_val - 1, a_top_val - 2, -3);
+//			rrb_index = bottom_near(stack_b, a_top_val - 1, a_top_val - 2, -3);
+//		}
+//		else if (sa_flag == 1 && rra_flag == 0)
+//		{
+////			printf("sa_flag %d\n", sa_flag);
+////			printf("rra_flag %d\n", rra_flag);
+////			printf("a_top+1 %d\n", a_top_val + 1);
+////			printf("a_top-1 %d\n", a_top_val - 1);
+//			rb_index = top_near(stack_b, a_top_val + 1, a_top_val - 1, -3); // last arg tmp
+//			rrb_index = bottom_near(stack_b, a_top_val + 1, a_top_val - 1, -3); //eaxamination
+//		}
+//		else if (sa_flag == 1 && rra_flag == 1)
+//		{
+//			rb_index = top_near(stack_b, a_top_val + 1, -3, -3); // last arg tmp
+//			rrb_index = bottom_near(stack_b, a_top_val + 1, -3, -3); //eaxamination	
+//		}
+//		else
+//		{
+//			
+////			printf("sa_flag %d\n", sa_flag);
+////			printf("rra_flag %d\n", rra_flag);
+////			printf("a_top-1 %d\n", a_top_val - 1);
+////			printf("a_top-2 %d\n", a_top_val - 2);
+////			printf("a_top-3 %d\n", a_top_val - 3);
+//			rb_index = top_near(stack_b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
+//			rrb_index = bottom_near(stack_b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
+//		}
 		// so far
 //		printf("rb_index %d\n", rb_index);
 //		printf("rrb_index %d\n", rrb_index);
-		if (rb_index <= rrb_index)
-		{
-			while (rb_index--)
-				rb(stack_b);
-		}
-		else
-		{
-			while (rrb_index--)
-				rrb(stack_b);
-		}
+		multiple_rb_or_rrb(stack_b, rb_index, rrb_index);
+// 	   	if (rb_index <= rrb_index)
+// 	   		multiple_rotate_b(stack_b, rb_index);
+// 	   	else
+//			multiple_reverse_rotate_b(stack_b, rrb_index);
 		//printf("b_head %d\n", stack_b->next->val);
 		pa(stack_a, stack_b);
 		//printf("topa %d\n", stack_a->next->val);
 		// cut func receive_node;
-		if (stack_a->next->next->val - stack_a->next->val == 2)
-			sa_flag = 1;
-		if (stack_a->next->next->val - stack_a->next->val == 1 && sa_flag == 1 && rra_flag == 0)
-		{
-			ra(stack_a);
-			rra_flag = 1;
-		}
-		if (stack_a->next->val - stack_a->prev->val == 1 && sa_flag == 0 && rra_flag == 1)
-		{
-			rra(stack_a);
-			rra_flag = 0;
-		}
-		if (stack_a->next->next->val - stack_a->next->val < 0)
-		{
-			sa(stack_a);
-			sa_flag = 0;
-			if (rra_flag > 0)
-			{
-				rra(stack_a);
-				rra_flag = 0;
-			}
-		}
-		if (stack_a->next->next->val - stack_a->next->val > 2)
-		{
-			ra(stack_a);
-			rra_flag = 1;
-		}
+		receiving_process(stack_a, &sa_flag, &rra_flag);
+//		if (stack_a->next->next->val - stack_a->next->val == 2)
+//			sa_flag = 1;
+//		if (stack_a->next->next->val - stack_a->next->val == 1 && sa_flag == 1 && rra_flag == 0)
+//			rra_flag = ra_and_set_flag(stack_a, rra_flag);
+//		if (stack_a->next->val - stack_a->prev->val == 1 && sa_flag == 0 && rra_flag == 1)
+//			rra_flag = rra_and_set_flag(stack_a, rra_flag);
+//		if (stack_a->next->next->val - stack_a->next->val < 0)
+//		{
+//			sa(stack_a);
+//			sa_flag = 0;
+//			if (rra_flag > 0)
+//				rra_flag = rra_and_set_flag(stack_a, rra_flag);
+//		}
+//		if (stack_a->next->next->val - stack_a->next->val > 2)
+//			rra_flag = ra_and_set_flag(stack_a, rra_flag);
 		i++;
 //		if (stack_b->next->val == -1)
 //		{
