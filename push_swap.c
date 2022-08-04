@@ -3,16 +3,50 @@
 # include <stddef.h>
 # include <stdio.h>
 # include <stdbool.h>
+# include <limits.h>
+# include "libft/libft.h"
 
-typedef struct s_list	t_list;
-struct s_list
+typedef struct s_listack	t_listack;
+struct s_listack
 {
-	t_list	*prev;
-	t_list	*next;
+	t_listack	*prev;
+	t_listack	*next;
 	int		val;
 };
 
-bool    is_only_sentinel(t_list *stack)
+
+static void	*all_free(char **arr, size_t i)
+{
+	while (i--)
+		free(arr[i]);
+	free(arr);
+	return (NULL);
+}
+
+//int	ft_isdigit(int c)
+//{
+//	return ('0' <= c && c <= '9');
+//}
+//
+//size_t	ft_strlen(const char *str)
+//{
+//	size_t	i;
+//
+//	i = 0;
+//	while (str[i] != '\0')
+//		i++;
+//	return (i);
+//}
+//
+//void	ft_putstr_fd(char *s, int fd)
+//{
+//	if (!s)
+//		return ;
+//	write(fd, s, ft_strlen(s));
+//	return ;
+//}
+
+bool    is_only_sentinel(t_listack *stack)
 {   
     return (stack->next == stack && stack->prev == stack);
 }
@@ -25,10 +59,10 @@ void	print_arry(int *arry, int size)
 	printf("\n");
 }
 
-void	print_list(t_list *stack, int stack_size)
+void	print_list(t_listack *stack)
 {
 	int i = 0;
-	t_list	*sentinel;
+	t_listack	*sentinel;
 
 	sentinel = stack;
 	while (stack->next != sentinel)
@@ -38,39 +72,84 @@ void	print_list(t_list *stack, int stack_size)
 		i++;
 	}
 	printf("elem %d %d\n", i, stack->val);
+	printf("sentinel %d %d\n", i, stack->next->val);
 	printf("\n");	
 	printf("\n");
 }
 
 int	count_elem(char **argv)
 {
+	char	**split_argv;
 	int	i;
+	int	j;
+	int	count;
 
+	count = 0;
 	i = 1;
 	while (argv[i] != NULL)
 	{
+		split_argv = ft_split(argv[i], ' ');
+		if (split_argv == NULL)
+			return (-1);
+		j = 0;
+		while (split_argv[j] != NULL)
+		{
+			j++;
+			count++;
+		}
+		all_free(split_argv, j);
 		i++;
 	}
-	return (i - 1);
+	return (count);
 }
 
 int	*create_arry(char **argv, int size)
 {
 	int	*arry;
+	char	**split_argv;
 	int	i;
 	int	j;
 
-	arry = (int *)malloc(sizeof(int) * size);
-	if (arry == NULL)
-		return (NULL);
-	i = 1;
-	while (argv[i] != NULL)
+	arry = (int *)malloc(sizeof(int)  * size);
+	if (arry == NULL)                 
+		return (NULL);                
+	i = 1;                           
+	while (argv[i] != NULL)           
 	{
-		arry[i - 1] = atoi(argv[i]);
+		split_argv = ft_split(argv[i], ' ');
+		if (split_argv == NULL)
+			return (NULL);
+		j = 0;
+		while (split_argv[j] != NULL)
+		{
+			arry[size - 1] = atoi(split_argv[j]);
+			j++;
+			size--;
+		}
+		all_free(split_argv, j);
 		i++;
-	}
-	return (arry);
-}
+	}                       
+	return (arry);                    
+}                                     
+                                      
+//int	*create_arry(char **argv, int  size)
+//{                                   
+//	int	*arry;                       }
+//	int	i;
+//	int	j;
+//
+//	arry = (int *)malloc(sizeof(int) * size);
+//	if (arry == NULL)
+//		return (NULL);
+//	i = 1;
+//	while (argv[i] != NULL)
+//	{
+//		arry[size - 1] = atoi(argv[i]);
+//		i++;
+//		size--;
+//	}
+//	return (arry);
+//}
 
 void	bubble_sort(int *arry, int size)
 {
@@ -150,11 +229,11 @@ void	coordinate_compression(int *arry, int size)
 //	print_arry(arry, size);
 }
 
-//t_list	*new_sentinel()
+//t_listack	*new_sentinel()
 //{
-//	t_list	*node;
+//	t_listack	*node;
 //
-//	node = (t_list *)malloc(sizeof(t_list));
+//	node = (t_listack *)malloc(sizeof(t_listack));
 //	if (node == NULL)
 //		return (NULL);
 //	node->prev = NULL; //will check
@@ -163,11 +242,11 @@ void	coordinate_compression(int *arry, int size)
 //	return (node);
 //}
 
-t_list  *new_sentinel()
+t_listack  *new_sentinel()
 {
-    t_list  *node;
+    t_listack  *node;
 
-    node = (t_list *)malloc(sizeof(t_list));
+    node = (t_listack *)malloc(sizeof(t_listack));
     if (node == NULL)
         return (NULL);
     node->prev = node; //will check
@@ -176,11 +255,11 @@ t_list  *new_sentinel()
     return (node);
 }
 
-t_list	*new_node(int val)
+t_listack	*new_node(int val)
 {
-	t_list	*node;
+	t_listack	*node;
 
-	node = (t_list *)malloc(sizeof(t_list));
+	node = (t_listack *)malloc(sizeof(t_listack));
 	if (node == NULL)
 		return (NULL);
 	node->prev = NULL; //init here? or late
@@ -189,9 +268,9 @@ t_list	*new_node(int val)
 	return (node);
 }
 
-//void	add_node_to_list(t_list *sentinel, t_list *node)
+//void	add_node_to_list(t_listack *sentinel, t_listack *node)
 //{
-//	t_list	*head_next; //because sentinel->next->next is round
+//	t_listack	*head_next; //because sentinel->next->next is round
 //
 //	if (sentinel->prev == NULL && sentinel->next == NULL)
 //	{
@@ -208,9 +287,9 @@ t_list	*new_node(int val)
 //	node->next = head_next;
 //}
 
-void    add_node_to_list(t_list *sentinel, t_list *node)
+void    add_node_to_list(t_listack *sentinel, t_listack *node)
 {
-    t_list  *head_next; //because sentinel->next->next is round
+    t_listack  *head_next; //because sentinel->next->next is round
 
     if (is_only_sentinel(sentinel))
     {
@@ -228,10 +307,10 @@ void    add_node_to_list(t_list *sentinel, t_list *node)
 }
 
 
-t_list	*create_stacklist(int *arry, int size)
+t_listack	*create_stacklist(int *arry, int size)
 {
-	t_list	*sentinel;
-	t_list	*node;
+	t_listack	*sentinel;
+	t_listack	*node;
 	int		i;
 	
 	i = 0;
@@ -252,16 +331,16 @@ t_list	*create_stacklist(int *arry, int size)
 }
 
 //
-//int	find_min(t_list *stack)
+//int	find_min(t_listack *stack)
 //{
 //}
 //
-void	swap(t_list *stack, int prev_index) //are changed two elm
+void	swap(t_listack *stack, int prev_index) //are changed two elm
 {
-	t_list	*prev_changed;
-	t_list	*next_changed;
-	t_list	*next_tmp;
-	t_list	*prev_tmp;
+	t_listack	*prev_changed;
+	t_listack	*next_changed;
+	t_listack	*next_tmp;
+	t_listack	*prev_tmp;
 	
 	// cut func find_prev_changed_pos and find_next_prev_changed_pos
 	if (prev_index == 0) // 0 is sentinel
@@ -291,7 +370,7 @@ void	swap(t_list *stack, int prev_index) //are changed two elm
 	next_tmp->prev = prev_changed;
 }
 
-void	sa(t_list *stack)
+void	sa(t_listack *stack)
 {
 	if (stack->next == stack->prev || is_only_sentinel(stack))
         return ;
@@ -316,7 +395,7 @@ void	sa(t_list *stack)
 
 }
 
-void	sb(t_list *stack)
+void	sb(t_listack *stack)
 {
 	if (stack->next == stack->prev || is_only_sentinel(stack))
         return ;
@@ -325,16 +404,16 @@ void	sb(t_list *stack)
 	//printf("sb_head %d\n", stack->next->val);
 }
 
-void	ra(t_list *stack)
+void	ra(t_listack *stack)
 {	
 	if (stack->next == stack->prev || is_only_sentinel(stack))
         return ;
 	swap(stack, 0); // 0 is top
 	printf("ra\n");
-	//t_list	*sentinel;
-	//t_list	*first;
-	//t_list	*second;
-	//t_list	*tail;
+	//t_listack	*sentinel;
+	//t_listack	*first;
+	//t_listack	*second;
+	//t_listack	*tail;
     //
 	//sentinel = stack;
 	//first = stack->next;
@@ -346,7 +425,7 @@ void	ra(t_list *stack)
 	//sentinel->next = second;
 }
 
-void	rb(t_list *stack)
+void	rb(t_listack *stack)
 {
 	if (stack->next == stack->prev || is_only_sentinel(stack))
         return ;
@@ -354,7 +433,7 @@ void	rb(t_list *stack)
 	printf("rb\n");
 }
 
-void	rra(t_list *stack)
+void	rra(t_listack *stack)
 {
 	if (stack->next == stack->prev || is_only_sentinel(stack))
         return ;
@@ -362,7 +441,7 @@ void	rra(t_list *stack)
 	printf("rra\n");
 }
 
-void	rrb(t_list *stack)
+void	rrb(t_listack *stack)
 {
 	if (stack->next == stack->prev || is_only_sentinel(stack))
         return ;
@@ -370,9 +449,9 @@ void	rrb(t_list *stack)
 	printf("rrb\n");
 }
 
-//t_list	*pop(t_list *stack)
+//t_listack	*pop(t_listack *stack)
 //{
-//	t_list	*pop_node;
+//	t_listack	*pop_node;
 //
 //	pop_node = stack->next;
 //	stack->next = stack->next->next;
@@ -387,24 +466,24 @@ void	rrb(t_list *stack)
 //	return (pop_node);
 //}
 
-//void	push(t_list *pushed_stack, t_list *pushed_node)
+//void	push(t_listack *pushed_stack, t_listack *pushed_node)
 //{
 //	add_node_to_list(pushed_stack, pushed_node);
 //	//printf("b_head %d\n", pushed_stack->next->val);
 //}
 //
-//void	pa(t_list *stack_b, t_list *stack_a)
+//void	pa(t_listack *stack_b, t_listack *stack_a)
 //{
-//	t_list	*pop_node;
+//	t_listack	*pop_node;
 //
 //	pop_node = pop(stack_b);
 //	push(stack_a, pop_node);
 //	//printf("a_head %d\n", stack_a->next->val);
 //}
 //
-//void	pb(t_list *stack_a, t_list *stack_b)
+//void	pb(t_listack *stack_a, t_listack *stack_b)
 //{
-//	t_list	*pop_node;
+//	t_listack	*pop_node;
 //
 //	pop_node = pop(stack_a);
 //	push(stack_b, pop_node);
@@ -412,18 +491,18 @@ void	rrb(t_list *stack)
 //
 //
 
-void    add_stack_top(t_list *stack, int val)
+void    add_stack_top(t_listack *stack, int val)
 {
-    t_list  *node;
+    t_listack  *node;
 
     node = new_node(val);
     add_node_to_list(stack, node);
 }
 
-void    del_stack_top(t_list *stack)
+void    del_stack_top(t_listack *stack)
 {
-    t_list  *top;
-    t_list  *top_next;
+    t_listack  *top;
+    t_listack  *top_next;
         
 
     top = stack->next;
@@ -440,7 +519,7 @@ void    del_stack_top(t_list *stack)
     free(top);
 }
 
-void    push(t_list *stack_1, t_list *stack_2)
+void    push(t_listack *stack_1, t_listack *stack_2)
 {
     if (is_only_sentinel(stack_2))
         return ;
@@ -448,7 +527,7 @@ void    push(t_list *stack_1, t_list *stack_2)
     del_stack_top(stack_2);
 }
 
-void    pa(t_list *stack_a, t_list *stack_b)
+void    pa(t_listack *stack_a, t_listack *stack_b)
 {
     if (is_only_sentinel(stack_b))
         return ;
@@ -456,7 +535,7 @@ void    pa(t_list *stack_a, t_list *stack_b)
 	printf("pa\n");
 }
 
-void    pb(t_list *stack_a, t_list *stack_b)
+void    pb(t_listack *stack_a, t_listack *stack_b)
 {
     if (is_only_sentinel(stack_a))
         return ;
@@ -464,7 +543,7 @@ void    pb(t_list *stack_a, t_list *stack_b)
 	printf("pb\n");
 }
 
-void	less_than_three_sort(t_list *stack_a, int size)
+void	less_than_three_sort(t_listack *stack_a, int size)
 {
 	int	top;
 	int	medium;
@@ -491,7 +570,7 @@ void	less_than_three_sort(t_list *stack_a, int size)
 		rra(stack_a);
 }
 
-int	find_min(t_list *stack, int size)
+int	find_min(t_listack *stack, int size)
 {
 	int	i;
 	int	min;
@@ -516,7 +595,7 @@ int	find_min(t_list *stack, int size)
 	return (min_index);
 }
 
-void	less_than_five_sort(t_list *stack_a, t_list *stack_b, int size)
+void	less_than_five_sort(t_listack *stack_a, t_listack *stack_b, int size)
 {
 	int min_index;
 	int	i;
@@ -554,11 +633,11 @@ void	less_than_five_sort(t_list *stack_a, t_list *stack_b, int size)
 
 
 
-int	get_front_index(t_list *stack, int chunk_min)
+int	get_front_index(t_listack *stack, int chunk_min)
 {
 	int	i;
 	int	chunk_max;
-	t_list *sentinel;
+	t_listack *sentinel;
 
 	sentinel = stack;
 	i = 0;
@@ -590,7 +669,7 @@ int	get_front_index(t_list *stack, int chunk_min)
 	return (i);
 }
 
-int	find_from_top(t_list *stack, int chunk_min)
+int	find_from_top(t_listack *stack, int chunk_min)
 {
 	int	index;
 
@@ -598,11 +677,11 @@ int	find_from_top(t_list *stack, int chunk_min)
 	return (index);
 }
 
-int	get_back_index(t_list *stack, int chunk_min)
+int	get_back_index(t_listack *stack, int chunk_min)
 {
 	int	i;
 	int	chunk_max;
-	t_list *sentinel;
+	t_listack *sentinel;
 
 	sentinel = stack;
 	i = 0;
@@ -636,7 +715,7 @@ int	get_back_index(t_list *stack, int chunk_min)
 }
 
 
-int	find_from_bottom(t_list *stack, int chunk_min)
+int	find_from_bottom(t_listack *stack, int chunk_min)
 {
 	int	index;
 
@@ -645,7 +724,7 @@ int	find_from_bottom(t_list *stack, int chunk_min)
 }
 
 
-void	push_chunk(t_list *stack_a, t_list *stack_b, int size, int chunk_min)
+void	push_chunk(t_listack *stack_a, t_listack *stack_b, int size, int chunk_min)
 {
 	int	ra_index;
 	int	rra_index;
@@ -655,7 +734,7 @@ void	push_chunk(t_list *stack_a, t_list *stack_b, int size, int chunk_min)
 	i = 0; 
 	chunk_size = size - chunk_min;
 	if (chunk_size > 20)
-		chunk_size = 20;
+		chunk_size = 20; //one_chunk_size;
 	while (i < chunk_size) //i < chunk_size
 	{
 		ra_index = find_from_top(stack_a, chunk_min);
@@ -689,10 +768,10 @@ void	push_chunk(t_list *stack_a, t_list *stack_b, int size, int chunk_min)
 	//}
 }
 
-int	front_max_val_index(t_list *stack, int size)
+int	front_max_val_index(t_listack *stack, int size)
 {
 	int	i;
-	t_list *sentinel;
+	t_listack *sentinel;
 
 	sentinel = stack;
 	i = 0;
@@ -708,10 +787,10 @@ int	front_max_val_index(t_list *stack, int size)
 	return (i);
 }
 
-int	back_max_val_index(t_list *stack, int size)
+int	back_max_val_index(t_listack *stack, int size)
 {
 	int	i;
-	t_list *sentinel;
+	t_listack *sentinel;
 
 	sentinel = stack;
 	i = 0;
@@ -727,9 +806,9 @@ int	back_max_val_index(t_list *stack, int size)
 	return (i + 1);	
 }
 
-int	top_near(t_list *stack, int find_val1, int find_val2, int find_val3)
+int	top_near(t_listack *stack, int find_val1, int find_val2, int find_val3)
 {
-	t_list	*sentinel;
+	t_listack	*sentinel;
 	int i;
 	int val; //test
 	sentinel = stack;
@@ -749,9 +828,9 @@ int	top_near(t_list *stack, int find_val1, int find_val2, int find_val3)
 	return (i);
 }
 
-int	bottom_near(t_list *stack, int find_val1, int find_val2, int find_val3)
+int	bottom_near(t_listack *stack, int find_val1, int find_val2, int find_val3)
 {
-	t_list	*sentinel;
+	t_listack	*sentinel;
 	int	i;
 	int	val;
 	sentinel = stack;
@@ -771,7 +850,7 @@ int	bottom_near(t_list *stack, int find_val1, int find_val2, int find_val3)
 	return (i + 1);
 }
 
-void	push_from_bigger(t_list *stack_a, t_list *stack_b, int size)
+void	push_from_bigger(t_listack *stack_a, t_listack *stack_b, int size)
 {
 	int	a_top_val;     // cut func get_near_index
 	int a_bottom_val;  // cut func get_near_index
@@ -898,7 +977,7 @@ void	push_from_bigger(t_list *stack_a, t_list *stack_b, int size)
 }
 
 
-void	medium_rare_sort(t_list *stack_a, t_list *stack_b, int size)
+void	medium_rare_sort(t_listack *stack_a, t_listack *stack_b, int size)
 {
 	int	min;
 
@@ -911,7 +990,7 @@ void	medium_rare_sort(t_list *stack_a, t_list *stack_b, int size)
 	push_from_bigger(stack_a, stack_b, size);
 }
 
-//void	some_sort(t_list *stack_a, t_list *stack_b, int size)
+//void	some_sort(t_listack *stack_a, t_listack *stack_b, int size)
 //{
 //	int	i;
 //	//int	chunk_size;
@@ -933,7 +1012,7 @@ void	medium_rare_sort(t_list *stack_a, t_list *stack_b, int size)
 
 
 
-void	push_swap(t_list *stack_a, t_list *stack_b, int size)
+void	push_swap(t_listack *stack_a, t_listack *stack_b, int size)
 {
 	if (size == 1)
 		return ;
@@ -946,14 +1025,105 @@ void	push_swap(t_list *stack_a, t_list *stack_b, int size)
 		//some_sort(stack_a, stack_b, size);
 }
 
+bool  check_only_digit(char *str)
+{
+    size_t  i;
+
+    i = 0;
+    if (str == NULL || str[i] == '\0')
+        return (false);
+	if (str[i] == '+' || str[i] == '-')
+		i++;
+	if (str[i] == '\0')
+		return (false);
+    while (str[i]) 
+    {   
+        if (ft_isdigit(str[i]) == 0)
+            return (false);
+        i++;    
+    }       
+    return (true);
+}
+
+bool	is_integer(const char *str)
+{
+	long long	decimal;
+	int	sign;
+
+	decimal = 0;
+	sign = 1;
+	if (*str == '+' || *str == '-')
+	{
+		sign = (44 - *str);
+		str++;
+	}
+	while ('0' <= *str && *str <= '9')
+	{
+		if ((sign * decimal > (INT_MAX - (*str - '0')) / 10)
+			|| sign * decimal < (INT_MIN + (*str - '0') / 10))
+			return (false);
+		decimal = (decimal * 10) + (*str - '0');
+		str++;
+	}
+	return (true);
+}
+
+bool	args_error_check(int argc, char **argv)
+{
+	char	**split_argv;
+	int	i;
+	int	j;
+
+	if (argc < 2)
+		exit(0);
+	i = 1;
+	while (argv[i] != NULL)
+	{
+		split_argv = ft_split(argv[i], ' ');
+		if (split_argv == NULL)
+			return (false);
+		j = 0;
+		while (split_argv[j] != NULL)
+		{
+			if (!check_only_digit(split_argv[j]) || !is_integer(split_argv[j]))
+			{
+				return (false);
+				//ft_putstr_fd("Error\n", 2);
+				//exit(1);
+			}
+			j++;
+		}
+		all_free(split_argv, j);
+		i++;
+	}
+	return (true);
+}
+
+void	stack_free(t_listack *stack)
+{
+	t_listack	*sentinel;
+	t_listack	*stack_next;
+
+	sentinel = stack;
+	while (stack->next != sentinel)
+	{
+		stack_next = stack->next;
+		stack->next = stack_next->next;
+		free(stack_next);
+		stack_next = NULL;
+	}
+	free(sentinel);
+	sentinel = NULL;
+}
+
 int	main(int argc, char **argv)
 {
-	t_list	*stack_a;
-	t_list	*stack_b;
+	t_listack	*stack_a;
+	t_listack	*stack_b;
 	int	*stack_arry;
 	int stack_size;
-	//if (!args_error_check())
-	//    return (0);
+	
+	args_error_check(argc, argv);
 	stack_size = count_elem(argv); //argc - 1 better than this?
 	stack_arry = create_arry(argv, stack_size);
 	if (stack_arry == NULL)
@@ -962,13 +1132,15 @@ int	main(int argc, char **argv)
 //	print_arry(stack_arry, stack_size);
 	coordinate_compression(stack_arry, stack_size);
 	stack_a = create_stacklist(stack_arry, stack_size);
-//	print_list(stack_a, stack_size);
+//	print_list(stack_a);
 	stack_b = create_stacklist(NULL, 0);
+	free(stack_arry);
 	push_swap(stack_a, stack_b, stack_size);
-	printf("sorted list\n");
-	print_list(stack_a, stack_size);
+//	printf("sorted list\n");
+//	print_list(stack_a);
+	stack_free(stack_a);
+	stack_free(stack_b);
 //	print_list(stack_b, stack_size);
 	return (0);
 }
-	//sa(stack_a);
 
