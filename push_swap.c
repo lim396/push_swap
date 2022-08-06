@@ -48,6 +48,9 @@ struct s_listack
 	t_olist	*order;
 };
 
+
+void	print_error(void);
+
 static void	*all_free(char **arr, size_t i)
 {
 	while (i--)
@@ -188,26 +191,38 @@ int *dup_arry(int *origin, int size)
 	return (copy);
 }
 
-void	coordinate_compression(int *arry, int size)
+bool	is_overlap(int *arry, int size)
 {
-	int	*licked_arry;
 	int	i;
-	int j;
-	
-	licked_arry = dup_arry(arry, size);
-	if (licked_arry == NULL)
+	int	j;
+
+	i = 0;
+	while (i < size - 1)
 	{
-		//free(arry)?
-		exit (1);
+		j = i + 1;
+		while (j < size)
+		{
+			if (arry[i] == arry[j])
+				return (true);
+			j++;
+		}
+		i++;
 	}
-	bubble_sort(licked_arry, size);
+	return (false);
+}
+
+void	compression_helper(int *arry, int * sorted_arry, int size)
+{
+	int	i;
+	int	j;
+
 	i = 0;
 	while (i < size)
 	{
 		j = 0;
 		while (j < size)
 		{
-			if (arry[j] == licked_arry[i])
+			if (arry[j] == sorted_arry[i])
 			{
 				arry[j] = i;
 				break ;
@@ -216,6 +231,37 @@ void	coordinate_compression(int *arry, int size)
 		}
 		i++;
 	}
+}
+
+void	coordinate_compression(int *arry, int size)
+{
+	int	*sorted_arry;
+	
+	sorted_arry = dup_arry(arry, size);
+	if (sorted_arry == NULL || is_overlap(arry, size))
+	{
+		free(arry);
+		free(sorted_arry);
+		print_error();
+	}
+	bubble_sort(sorted_arry, size);
+	compression_helper(arry, sorted_arry, size);
+	free(sorted_arry);
+//	i = 0;
+//	while (i < size)
+//	{
+//		j = 0;
+//		while (j < size)
+//		{
+//			if (arry[j] == licked_arry[i])
+//			{
+//				arry[j] = i;
+//				break ;
+//			}
+//			j++;
+//		}
+//		i++;
+//	}
 }
 
 
@@ -315,11 +361,27 @@ t_stack *find_next_changed_pos(t_stack *stack, int prev_index)
     return (next_changed);
 }
 
+t_olist	*new_order_sentinel()
+{
+    t_olist  *order;
+
+    order = (t_olist *)malloc(sizeof(t_olist));
+    if (order == NULL)
+        return (NULL);
+    order->prev = order;
+    order->next = order;
+    order->kind = O_NO;
+    return (order);
+	
+}
+
 t_olist	*new_order(t_okind kind)
 {
 	t_olist	*order;
 
 	order = (t_olist *)malloc(sizeof(t_olist));
+	if (order == NULL)
+		return (NULL);
 	order->next = NULL;
 	order->prev = NULL;
 	order->kind = kind;
@@ -953,7 +1015,7 @@ bool  check_only_digit(char *str)
         return (false);
 	if (str[i] == '+' || str[i] == '-')
 		i++;
-	if (str[i] == '\0')
+	if (str[i] == '\0' || (str[i] == '0' && str[i + 1] != '\0'))
 		return (false);
     while (str[i]) 
     {   
@@ -1005,11 +1067,7 @@ bool	args_error_check(int argc, char **argv)
 		while (split_argv[j] != NULL)
 		{
 			if (!check_only_digit(split_argv[j]) || !is_integer(split_argv[j]))
-			{
 				return (false);
-				//ft_putstr_fd("Error\n", 2);
-				//exit(1);
-			}
 			j++;
 		}
 		all_free(split_argv, j);
@@ -1133,6 +1191,21 @@ void	order_list_free(t_olist *order)
 	sentinel = NULL;
 }
 
+void	print_error()
+{
+	ft_putstr_fd("Error\n", 2);
+	exit(1);
+}
+
+void	error_handler(t_listack *stack)
+{
+	ft_putstr_fd("Error\n", 2);
+	stack_free(stack->a);
+	stack_free(stack->b);
+	order_list_free(stack->order);
+	exit(1);
+}
+
 int	main(int argc, char **argv)
 {
 	t_listack stack;
@@ -1141,11 +1214,14 @@ int	main(int argc, char **argv)
 	int	*stack_arry;
 	int stack_size;
 	
-	args_error_check(argc, argv);
+	if (!args_error_check(argc, argv))
+		print_error();
 	stack_size = count_elem(argv);
+	if (stack_size < 0)
+		print_error();
 	stack_arry = create_arry(argv, stack_size);
 	if (stack_arry == NULL)
-		return (1);
+		print_error();
 //	printf("create arry\n");
 //	print_arry(stack_arry, stack_size);
 	coordinate_compression(stack_arry, stack_size);
@@ -1155,10 +1231,13 @@ int	main(int argc, char **argv)
 //	stack_b = create_stacklist(NULL, 0);
 	stack.b = create_stacklist(NULL, 0);
 	free(stack_arry);
-	stack.order = (t_olist *)malloc(sizeof(t_olist));
-	stack.order->next = stack.order;
-	stack.order->prev = stack.order;
-	stack.order->kind = O_NO;
+	stack.order = new_order_sentinel();
+//	stack.order = (t_olist *)malloc(sizeof(t_olist));
+	if (stack.a == NULL || stack.b == NULL || stack.order == NULL)
+		error_handler(&stack);
+//	stack.order->next = stack.order;
+//	stack.order->prev = stack.order;
+//	stack.order->kind = O_NO;
 //	push_swap(stack_a, stack_b, stack_size);
 	push_swap(&stack, stack_size);
 	print_order(stack.order);
