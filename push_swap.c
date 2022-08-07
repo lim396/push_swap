@@ -50,8 +50,9 @@ struct s_listack
 
 
 void	print_error(void);
+void	error_handler(t_listack *stack);
 
-static void	*all_free(char **arr, size_t i)
+void	*all_free(char **arr, size_t i)
 {
 	while (i--)
 		free(arr[i]);
@@ -104,12 +105,14 @@ int	count_elem(char **argv)
 	{
 		split_argv = ft_split(argv[i], ' ');
 		if (split_argv == NULL)
-			return (-1);
+			return (INT_MAX);
 		j = 0;
 		while (split_argv[j] != NULL)
 		{
 			j++;
 			count++;
+			if (count >= INT_MAX)
+				return (INT_MAX);
 		}
 		all_free(split_argv, j);
 		i++;
@@ -431,91 +434,106 @@ void	swap(t_stack *stack, int prev_index)
 	next_tmp->prev = prev_changed;
 }
 
-void	sa(t_stack *stack, t_olist *order)
+void	sa(t_listack *stack, t_olist *order)
 {
 	t_olist	*add_order;
 
-	if (stack->next == stack->prev || is_only_sentinel(stack))
+	if (stack->a->next == stack->a->prev || is_only_sentinel(stack->a))
         return ;
-	swap(stack, TOP);
+	swap(stack->a, TOP);
 	order->kind = O_SA;
 	add_order = new_order(order->kind);
+	if (add_order == NULL)
+		error_handler(stack);
 	add_node_to_order_list(order, add_order);
 //	printf("sa\n");
 }
 
-void	sb(t_stack *stack, t_olist *order)
+void	sb(t_listack *stack, t_olist *order)
 {
 	t_olist	*add_order;
 
-	if (stack->next == stack->prev || is_only_sentinel(stack))
+	if (stack->b->next == stack->b->prev || is_only_sentinel(stack->b))
         return ;
-	swap(stack, TOP);
+	swap(stack->b, TOP);
 	order->kind = O_SB;
 	add_order = new_order(order->kind);
+	if (add_order == NULL)
+		error_handler(stack);
 	add_node_to_order_list(order, add_order);
 //	printf("sb\n");
 }
 
-void	ra(t_stack *stack, t_olist *order)
+void	ra(t_listack *stack, t_olist *order)
 {	
 	t_olist	*add_order;
 
-	if (stack->next == stack->prev || is_only_sentinel(stack))
+	if (stack->a->next == stack->a->prev || is_only_sentinel(stack->a))
         return ;
-	swap(stack, SENTINEL); // 0 is top
+	swap(stack->a, SENTINEL); // 0 is top
 	order->kind = O_RA;
 	add_order = new_order(order->kind);
+	if (add_order == NULL)
+		error_handler(stack);
 	add_node_to_order_list(order, add_order);
 //	printf("ra\n");
 }
 
-void	rb(t_stack *stack, t_olist *order)
+void	rb(t_listack *stack, t_olist *order)
 {
 	t_olist	*add_order;
 
-	if (stack->next == stack->prev || is_only_sentinel(stack))
+	if (stack->b->next == stack->b->prev || is_only_sentinel(stack->b))
         return ;
-	swap(stack, SENTINEL); // 0 is sentinel
+	swap(stack->b, SENTINEL); // 0 is sentinel
 	order->kind = O_RB;
 	add_order = new_order(order->kind);
+	if (add_order == NULL)
+		error_handler(stack);
 	add_node_to_order_list(order, add_order);
 //	printf("rb\n");
 }
 
-void	rra(t_stack *stack, t_olist *order)
+void	rra(t_listack *stack, t_olist *order)
 {
 	t_olist	*add_order;
 
-	if (stack->next == stack->prev || is_only_sentinel(stack))
+	if (stack->a->next == stack->a->prev || is_only_sentinel(stack->a))
         return ;
-	swap(stack, BOTTOM); // -1 is bottom
+	swap(stack->a, BOTTOM); // -1 is bottom
 	order->kind = O_RRA;
 	add_order = new_order(order->kind);
+	if (add_order == NULL)
+		error_handler(stack);
 	add_node_to_order_list(order, add_order);
 //	printf("rra\n");
 }
 
-void	rrb(t_stack *stack, t_olist *order)
+void	rrb(t_listack *stack, t_olist *order)
 {
 	t_olist	*add_order;
 
-	if (stack->next == stack->prev || is_only_sentinel(stack))
+	if (stack->b->next == stack->b->prev || is_only_sentinel(stack->b))
         return ;
-	swap(stack, BOTTOM);
+	swap(stack->b, BOTTOM);
 	order->kind = O_RRB;
 	add_order = new_order(order->kind);
+	if (add_order == NULL)
+		error_handler(stack);
 	add_node_to_order_list(order, add_order);
 //	printf("rrb\n");
 }
 
 
-void    add_stack_top(t_stack *stack, int val)
+int    add_stack_top(t_stack *stack, int val)
 {
     t_stack  *node;
 
     node = new_node(val);
+	if (node == NULL)
+		return (-1);
     add_node_to_list(stack, node);
+	return (0);
 }
 
 void    del_stack_top(t_stack *stack)
@@ -537,65 +555,80 @@ void    del_stack_top(t_stack *stack)
     free(top);
 }
 
-void    push(t_stack *stack_1, t_stack *stack_2)
+int    push(t_stack *stack_1, t_stack *stack_2)
 {
+	int	flag;
+
     if (is_only_sentinel(stack_2))
-        return ;
-    add_stack_top(stack_1, stack_2->next->val);
+        return (0);
+    flag = add_stack_top(stack_1, stack_2->next->val);
+	if (flag == -1)
+		return (-1);
     del_stack_top(stack_2);
+	return (0);
 }
 
-void    pa(t_stack *stack_a, t_stack *stack_b, t_olist *order)
+void    pa(t_listack *stack, t_olist *order)
 {
 	t_olist	*add_order;
+	int	flag;
 
-    if (is_only_sentinel(stack_b))
+    if (is_only_sentinel(stack->b))
         return ;
+    flag = push(stack->a, stack->b);
+	if (flag == -1)
+		error_handler(stack);
 	order->kind = O_PA;
 	add_order = new_order(order->kind);
+	if (add_order == NULL)
+		error_handler(stack);
 	add_node_to_order_list(order, add_order);
-    push(stack_a, stack_b);
 //	printf("pa\n");
 }
 
-void    pb(t_stack *stack_a, t_stack *stack_b, t_olist *order)
+void    pb(t_listack *stack, t_olist *order)
 {
 	t_olist	*add_order;
+	int	flag;
 
-    if (is_only_sentinel(stack_a))
+    if (is_only_sentinel(stack->a))
         return ;
+    flag = push(stack->b, stack->a);
+	if (flag == -1)
+		error_handler(stack);
 	order->kind = O_PB;
 	add_order = new_order(order->kind);
+	if (add_order == NULL)
+		error_handler(stack);
 	add_node_to_order_list(order, add_order);
-    push(stack_b, stack_a);
 //	printf("pb\n");
 }
 
-void	less_than_three_sort(t_stack *stack_a, t_olist *order, int size)
+void	less_than_three_sort(t_listack *stack, t_olist *order, int size)
 {
 	int	top;
 	int	medium;
 	int	bottom;
 
-	top = stack_a->next->val;
-	medium = stack_a->next->next->val;
-	bottom = stack_a->prev->val;
+	top = stack->a->next->val;
+	medium = stack->a->next->next->val;
+	bottom = stack->a->prev->val;
 	if ((top > medium && top < bottom && medium < bottom) || size == 2)
-		sa(stack_a, order);
+		sa(stack, order);
 	if (top > medium && top > bottom && medium > bottom)
 	{
-		sa(stack_a, order);
-		rra(stack_a, order);
+		sa(stack, order);
+		rra(stack, order);
 	}
 	if (top > medium && top > bottom && medium < bottom)
-		ra(stack_a, order);
+		ra(stack, order);
 	if (top < medium && top < bottom && medium > bottom)
 	{
-		sa(stack_a, order);
-		ra(stack_a, order);
+		sa(stack, order);
+		ra(stack, order);
 	}
 	if (top < medium && top > bottom && medium > bottom)
-		rra(stack_a, order);
+		rra(stack, order);
 }
 
 int	find_min(t_stack *stack, int size)
@@ -621,18 +654,18 @@ int	find_min(t_stack *stack, int size)
 	return (min_index);
 }
 
-int	pb_min_val(t_stack *stack_a, t_stack *stack_b, int *size, t_olist *order)
+int	pb_min_val(t_listack *stack, int *size, t_olist *order)
 {
 	int min_index;
 	int n_of_pb;
 	
 	n_of_pb = 0;
-	min_index = find_min(stack_a, *size);
+	min_index = find_min(stack->a, *size);
 	if (min_index < ((*size + 1) / 2))
 	{
 		while (min_index)
 		{
-			ra(stack_a, order);
+			ra(stack, order);
 			min_index--;
 		}
 	}
@@ -640,11 +673,11 @@ int	pb_min_val(t_stack *stack_a, t_stack *stack_b, int *size, t_olist *order)
 	{
 		while (*size - min_index)
 		{
-			rra(stack_a, order);
+			rra(stack, order);
 			min_index++;
 		}
 	}
-	pb(stack_a, stack_b, order);
+	pb(stack, order);
 	n_of_pb++;
 	(*size)--;
 	return (n_of_pb);
@@ -657,16 +690,15 @@ void	less_than_five_sort(t_listack *stack, int size)
 	n_of_pb = 0;
 	while (size > 3)
 	{
-		n_of_pb += pb_min_val(stack->a, stack->b, &size, stack->order);
+		n_of_pb += pb_min_val(stack, &size, stack->order);
 	}
-	less_than_three_sort(stack->a, stack->order, 3);
+	less_than_three_sort(stack, stack->order, 3);
 	while (n_of_pb-- > 0)
-		pa(stack->a, stack->b, stack->order);
+		pa(stack, stack->order);
 }
 
 
-
-int	get_front_index(t_stack *stack, int chunk_min, int chunk_size)
+int	find_from_top(t_stack *stack, int chunk_min, int chunk_size)
 {
 	int	i;
 	int	chunk_max;
@@ -685,15 +717,8 @@ int	get_front_index(t_stack *stack, int chunk_min, int chunk_size)
 	return (i);
 }
 
-int	find_from_top(t_stack *stack, int chunk_min, int chunk_size)
-{
-	int	index;
 
-	index = get_front_index(stack, chunk_min, chunk_size);
-	return (index);
-}
-
-int	get_back_index(t_stack *stack, int chunk_min, int chunk_size)
+int	find_from_bottom(t_stack *stack, int chunk_min, int chunk_size)
 {
 	int	i;
 	int	chunk_max;
@@ -703,8 +728,7 @@ int	get_back_index(t_stack *stack, int chunk_min, int chunk_size)
 	i = 0;
 	chunk_max = chunk_min + chunk_size - 1;
 	while (stack->prev != sentinel)
-	{
-		
+	{		
 		if (chunk_min <= stack->prev->val && stack->prev->val <= chunk_max)
 			break ;
 		i++;
@@ -713,22 +737,13 @@ int	get_back_index(t_stack *stack, int chunk_min, int chunk_size)
 	return (i + 1);
 }
 
-
-int	find_from_bottom(t_stack *stack, int chunk_min, int chunk_size)
-{
-	int	index;
-
-	index = get_back_index(stack, chunk_min, chunk_size);
-	return (index);
-}
-
-void	multiple_rotate_a(t_stack *stack, int r_index, t_olist *order)
+void	multiple_rotate_a(t_listack *stack, int r_index, t_olist *order)
 {
 	while (r_index--)
 		ra(stack, order);
 }
 
-void	multiple_reverse_rotate_a(t_stack *stack, int rr_index, t_olist *order)
+void	multiple_reverse_rotate_a(t_listack *stack, int rr_index, t_olist *order)
 {
 	while (rr_index--)
 		rra(stack, order);
@@ -750,12 +765,12 @@ void	push_chunk(t_listack *stack, int size, int chunk_min, int one_chunk)
 		ra_index = find_from_top(stack->a, chunk_min, chunk_size);
 		rra_index = find_from_bottom(stack->a, chunk_min, chunk_size);
 		if (ra_index <= rra_index)
-			multiple_rotate_a(stack->a, ra_index, stack->order);
+			multiple_rotate_a(stack, ra_index, stack->order);
 		else
-			multiple_reverse_rotate_a(stack->a, rra_index, stack->order);
-		pb(stack->a, stack->b, stack->order);
+			multiple_reverse_rotate_a(stack, rra_index, stack->order);
+		pb(stack, stack->order);
 		if (stack->b->next->val > chunk_min + (chunk_size / 2 - 1)) //chunk_size better than one_chunk 
-			rb(stack->b, stack->order);
+			rb(stack, stack->order);
 //		if (stack_b->next->val < stack_b->next->next->val)
 //			sb(stack_b);
 		i++;
@@ -836,58 +851,58 @@ int	bottom_near(t_stack *stack, int find_val1, int find_val2, int find_val3)
 	return (i + 1);
 }
 
-int get_near_rb_index(t_stack *stack_a, t_stack *stack_b, int sa_flag, int rra_flag)
+int get_near_rb_index(t_stack *a, t_stack *b, int sa_flag, int rra_flag)
 {
     int a_top_val;
     int a_bottom_val;
     int rb_index;
 
-    a_top_val = stack_a->next->val;
-    a_bottom_val = stack_a->prev->val;
+    a_top_val = a->next->val;
+    a_bottom_val = a->prev->val;
     if (rra_flag == 1 && sa_flag == 0)
-        rb_index = top_near(stack_b, a_top_val - 1, a_top_val - 2, -3);
+        rb_index = top_near(b, a_top_val - 1, a_top_val - 2, -3);
     else if (sa_flag == 1 && rra_flag == 0)
-        rb_index = top_near(stack_b, a_top_val + 1, a_top_val - 1, -3);
+        rb_index = top_near(b, a_top_val + 1, a_top_val - 1, -3);
     else if (sa_flag == 1 && rra_flag == 1)
-        rb_index = top_near(stack_b, a_top_val + 1, -3, -3);
+        rb_index = top_near(b, a_top_val + 1, -3, -3);
     else
-		rb_index = top_near(stack_b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
+		rb_index = top_near(b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
     return (rb_index);
 }
 
 
-int get_near_rrb_index(t_stack *stack_a, t_stack *stack_b, int sa_flag, int rra_flag)
+int get_near_rrb_index(t_stack *a, t_stack *b, int sa_flag, int rra_flag)
 {
     int a_top_val;
     int a_bottom_val;
     int rrb_index;
 
-    a_top_val = stack_a->next->val;
-    a_bottom_val = stack_a->prev->val;
+    a_top_val = a->next->val;
+    a_bottom_val = a->prev->val;
     if (rra_flag == 1 && sa_flag == 0)
-        rrb_index = bottom_near(stack_b, a_top_val - 1, a_top_val - 2, -3);
+        rrb_index = bottom_near(b, a_top_val - 1, a_top_val - 2, -3);
     else if (sa_flag == 1 && rra_flag == 0)
-        rrb_index = bottom_near(stack_b, a_top_val + 1, a_top_val - 1, -3);
+        rrb_index = bottom_near(b, a_top_val + 1, a_top_val - 1, -3);
     else if (sa_flag == 1 && rra_flag == 1)
-        rrb_index = bottom_near(stack_b, a_top_val + 1, -3, -3);
+        rrb_index = bottom_near(b, a_top_val + 1, -3, -3);
     else
-        rrb_index = bottom_near(stack_b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
+        rrb_index = bottom_near(b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
     return (rrb_index);
 }
 
-void	multiple_rotate_b(t_stack *stack, int r_index, t_olist *order)
+void	multiple_rotate_b(t_listack *stack, int r_index, t_olist *order)
 {
 	while (r_index--)
 		rb(stack, order);
 }
 
-void	multiple_reverse_rotate_b(t_stack *stack, int rr_index, t_olist *order)
+void	multiple_reverse_rotate_b(t_listack *stack, int rr_index, t_olist *order)
 {
 	while (rr_index--)
 		rrb(stack, order);
 }
 
-int	rra_and_set_flag(t_stack *stack, int flag, t_olist *order)
+int	rra_and_set_flag(t_listack *stack, int flag, t_olist *order)
 {
 	rra(stack, order);
 	if (flag == 1)
@@ -896,7 +911,7 @@ int	rra_and_set_flag(t_stack *stack, int flag, t_olist *order)
 }
 
 
-int	ra_and_set_flag(t_stack *stack, int flag, t_olist *order)
+int	ra_and_set_flag(t_listack *stack, int flag, t_olist *order)
 {
 	ra(stack, order);
 	if (flag == 0)
@@ -904,28 +919,28 @@ int	ra_and_set_flag(t_stack *stack, int flag, t_olist *order)
 	return (flag);
 }
 
-void	receiving_process(t_stack *a, int *sa_flag, int *rra_flag, t_olist *order)
+void	receive_proc(t_listack *sta, int *sa_flag, int *rra_flag, t_olist *order)
 {
-	if (a->next->next->val - a->next->val == 2)
+	if (sta->a->next->next->val - sta->a->next->val == 2)
 		*sa_flag = 1;
-	if (a->next->next->val - a->next->val == 1
+	if (sta->a->next->next->val - sta->a->next->val == 1
 			&& *sa_flag == 1 && *rra_flag == 0)
-		*rra_flag = ra_and_set_flag(a, *rra_flag, order);
-	if (a->next->val - a->prev->val == 1
+		*rra_flag = ra_and_set_flag(sta, *rra_flag, order);
+	if (sta->a->next->val - sta->a->prev->val == 1
 			&& *sa_flag == 0 && *rra_flag == 1)
-		*rra_flag = rra_and_set_flag(a, *rra_flag, order);
-	if (a->next->next->val - a->next->val < 0)
+		*rra_flag = rra_and_set_flag(sta, *rra_flag, order);
+	if (sta->a->next->next->val - sta->a->next->val < 0)
 	{
-		sa(a, order);
+		sa(sta, order);
 		*sa_flag = 0;
 		if (*rra_flag > 0)
-			*rra_flag = rra_and_set_flag(a, *rra_flag, order);
+			*rra_flag = rra_and_set_flag(sta, *rra_flag, order);
 	}
-	if (a->next->next->val - a->next->val > 2)
-		*rra_flag = ra_and_set_flag(a, *rra_flag, order);
+	if (sta->a->next->next->val - sta->a->next->val > 2)
+		*rra_flag = ra_and_set_flag(sta, *rra_flag, order);
 }
 
-void	multiple_rb_rrb(t_stack *b, int rb_index, int rrb_index, t_olist *order)
+void	mult_rb_rrb(t_listack *b, int rb_index, int rrb_index, t_olist *order)
 {
 	if (rb_index <= rrb_index)
 		multiple_rotate_b(b, rb_index, order);
@@ -943,16 +958,16 @@ void	push_from_bigger(t_listack *stack, int size)
 
 	rb_index = front_max_val_index(stack->b, size);
 	rrb_index = back_max_val_index(stack->b, size);
-	multiple_rb_rrb(stack->b, rb_index, rrb_index, stack->order);
-	pa(stack->a, stack->b, stack->order);
+	mult_rb_rrb(stack, rb_index, rrb_index, stack->order);
+	pa(stack, stack->order);
 	i = 0;
 	while (i < size - 1)
 	{
 		rb_index = get_near_rb_index(stack->a, stack->b, sa_flag, rra_flag);
         rrb_index = get_near_rrb_index(stack->a, stack->b, sa_flag, rra_flag);
-		multiple_rb_rrb(stack->b, rb_index, rrb_index, stack->order);
-		pa(stack->a, stack->b, stack->order);
-		receiving_process(stack->a, &sa_flag, &rra_flag, stack->order);
+		mult_rb_rrb(stack, rb_index, rrb_index, stack->order);
+		pa(stack, stack->order);
+		receive_proc(stack, &sa_flag, &rra_flag, stack->order);
 		i++;
 	}
 }
@@ -999,7 +1014,7 @@ void	push_swap(t_listack *stack, int size)
 	if (size == 1)
 		return ;
 	if (size <= 3)
-		less_than_three_sort(stack->a, stack->order, size);
+		less_than_three_sort(stack, stack->order, size);
 	if (size <= 5)
 		less_than_five_sort(stack, size);
 	else
@@ -1054,12 +1069,16 @@ bool	args_error_check(int argc, char **argv)
 	char	**split_argv;
 	int	i;
 	int	j;
-
+	char	*test;
+	int l;
 	if (argc < 2)
 		exit(0);
 	i = 1;
+	l = argc;
+	test = argv[i];
 	while (argv[i] != NULL)
 	{
+		test = argv[i];
 		split_argv = ft_split(argv[i], ' ');
 		if (split_argv == NULL)
 			return (false);
@@ -1102,21 +1121,21 @@ int	check_print_rr(t_olist *order)
 	{
 		if (order->prev->prev->kind == O_RB)
 		{
-			printf("rr\n");
+			ft_putstr_fd("rr\n", 1);
 			flag = 1;
 		}
 		else
-			printf("ra\n");
+			ft_putstr_fd("ra\n", 1);
 	}
 	if (order->prev->kind == O_RB)
 	{
 		if (order->prev->prev->kind == O_RA)
 		{
-			printf("rr\n");
+			ft_putstr_fd("rr\n", 1);
 			flag = 1;
 		}
 		else
-			printf("rb\n");
+			ft_putstr_fd("rb\n", 1);
 	}
 	return (flag);
 }
@@ -1130,21 +1149,21 @@ int	check_print_rrr(t_olist *order)
 	{
 		if (order->prev->prev->kind == O_RRB)
 		{
-			printf("rrr\n");
+			ft_putstr_fd("rrr\n", 1);
 			flag = 1;
 		}
 		else
-			printf("rra\n");
+			ft_putstr_fd("rra\n", 1);
 	}
 	if (order->prev->kind == O_RRB)
 	{
 		if (order->prev->prev->kind == O_RRA)
 		{
-			printf("rrr\n");
+			ft_putstr_fd("rrr\n", 1);
 			flag = 1;
 		}
 		else
-			printf("rrb\n");
+			ft_putstr_fd("rrb\n", 1);
 	}
 	return (flag);
 }
@@ -1159,13 +1178,13 @@ void	print_order(t_olist *order)
 	while (order->prev != sentinel)
 	{
 		if (order->prev->kind == O_SA)
-			printf("sa\n");
+			ft_putstr_fd("sa\n", 1);
 		if (order->prev->kind == O_SB)
-			printf("sa\n");
+			ft_putstr_fd("sa\n", 1);
 		if (order->prev->kind == O_PA)
-			printf("pa\n");
+			ft_putstr_fd("pa\n", 1);
 		if (order->prev->kind == O_PB)
-			printf("pb\n");
+			ft_putstr_fd("pb\n", 1);
 		rr_flag = check_print_rr(order);
 		rrr_flag = check_print_rrr(order);
 		if (rr_flag || rrr_flag)
@@ -1217,7 +1236,7 @@ int	main(int argc, char **argv)
 	if (!args_error_check(argc, argv))
 		print_error();
 	stack_size = count_elem(argv);
-	if (stack_size < 0)
+	if (stack_size >= INT_MAX)
 		print_error();
 	stack_arry = create_arry(argv, stack_size);
 	if (stack_arry == NULL)
@@ -1249,4 +1268,3 @@ int	main(int argc, char **argv)
 //	print_list(stack_b, stack_size);
 	return (0);
 }
-

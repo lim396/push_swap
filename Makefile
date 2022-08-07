@@ -2,23 +2,28 @@ CC = gcc
 CFLAGS = -g -Wall -Wextra -Werror
 
 NAME = push_swap
+CHECKER = _checker
 #HEADER = push_swap.h
 LIBFT= ./libft/libft.a
 
-SRCS=push_swap.c
+M_SRCS=push_swap.c
+B_SRCS=checker.c get_next_line.c get_next_line_utils.c
 
-OBJS=$(SRCS:.c=.o)
+M_OBJS=$(M_SRCS:.c=.o)
+B_OBJS=$(B_SRCS:.c=.o)
 
 all: $(NAME)
 
-$(NAME): $(OBJS) $(LIBFT)
-	$(CC) $(CFLAGS) -o $@ $(OBJS) $(LIBFT)
-
-#%.o: %.c
-#	$(CC) $(CFLAGS) -o $@ $<
+$(NAME): $(M_OBJS) $(LIBFT)
+	$(CC) $(CFLAGS) -o $@ $(M_OBJS) $(LIBFT)
 
 $(LIBFT):
 	$(MAKE) -C ./libft
+
+bonus: $(CHECKER)
+
+$(CHECKER): $(B_OBJS) $(LIBFT)
+	$(CC) $(CFLAGS) -o $@ $(B_OBJS) $(LIBFT)
 
 
 clean:
@@ -26,8 +31,9 @@ clean:
 	$(RM) *.o
 
 fclean: clean
-	$(RM) $(NAME)
+	$(MAKE) fclean -C ./libft
+	$(RM) $(NAME) $(CHECKER)
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re bonus
