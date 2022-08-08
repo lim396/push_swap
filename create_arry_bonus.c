@@ -47,7 +47,7 @@ int	*create_arry(char **argv, int size)
 		j = 0;
 		while (split_argv[j] != NULL)
 		{
-			arry[size - 1] = atoi(split_argv[j]);
+			arry[size - 1] = ft_atoi(split_argv[j]);
 			j++;
 			size--;
 		}
