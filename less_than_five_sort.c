@@ -42,7 +42,6 @@ int	find_min(t_stack *stack, int size)
 		{
 			min = stack->next->val;
 			min_index = i;
-
 		}
 		stack = stack->next;
 		i++;
@@ -52,9 +51,9 @@ int	find_min(t_stack *stack, int size)
 
 int	pb_min_val(t_listack *stack, int *size, t_olist *order)
 {
-	int min_index;
-	int n_of_pb;
-	
+	int	min_index;
+	int	n_of_pb;
+
 	n_of_pb = 0;
 	min_index = find_min(stack->a, *size);
 	if (min_index < ((*size + 1) / 2))

@@ -45,10 +45,10 @@ void	read_orders(t_listack *stack)
 
 int	main(int argc, char **argv)
 {
-	t_listack stack;
-	int	*stack_arry;
-	int	stack_size;
-	
+	t_listack	stack;
+	int			*stack_arry;
+	int			stack_size;
+
 	if (!args_error_check(argc, argv))
 		print_error();
 	stack_size = count_elem(argv);

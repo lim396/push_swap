@@ -16,16 +16,16 @@ bool	is_sorted(t_stack *stack)
 
 int	measure_stack(t_stack *stack)
 {
-	int i;
-    t_stack *sentinel;
-    
-    sentinel = stack;
+	int		i;
+	t_stack	*sentinel;
+
+	sentinel = stack;
 	i = 0;
-    while (stack->next != sentinel)
-    {   
-        stack = stack->next;
-        i++;
-    }
+	while (stack->next != sentinel)
+	{
+		stack = stack->next;
+		i++;
+	}
 	return (i);
 }
 

@@ -3,7 +3,7 @@
 void	bubble_sort(int *arry, int size)
 {
 	int	i;
-	int left;
+	int	left;
 	int	right;
 	int	tmp;
 
@@ -27,9 +27,9 @@ void	bubble_sort(int *arry, int size)
 	}
 }
 
-int *dup_arry(int *origin, int size)
+int	*dup_arry(int *origin, int size)
 {
-	int *copy;
+	int	*copy;
 	int	i;
 
 	copy = (int *)malloc(sizeof(int) * size);
@@ -64,7 +64,7 @@ bool	is_overlap(int *arry, int size)
 	return (false);
 }
 
-void	compression_helper(int *arry, int * sorted_arry, int size)
+void	compression_helper(int *arry, int *sorted_arry, int size)
 {
 	int	i;
 	int	j;
@@ -89,7 +89,7 @@ void	compression_helper(int *arry, int * sorted_arry, int size)
 void	coordinate_compression(int *arry, int size)
 {
 	int	*sorted_arry;
-	
+
 	sorted_arry = dup_arry(arry, size);
 	if (sorted_arry == NULL || is_overlap(arry, size))
 	{

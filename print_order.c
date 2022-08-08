@@ -3,7 +3,7 @@
 int	check_print_rr(t_olist *order)
 {
 	int	flag;
-	
+
 	flag = 0;
 	if (order->prev->kind == O_RA)
 	{
@@ -59,8 +59,8 @@ int	check_print_rrr(t_olist *order)
 void	print_order(t_olist *order)
 {
 	t_olist	*sentinel;
-	int	rr_flag;
-	int	rrr_flag;
+	int		rr_flag;
+	int		rrr_flag;
 
 	sentinel = order;
 	while (order->prev != sentinel)

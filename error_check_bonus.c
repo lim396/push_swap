@@ -1,29 +1,29 @@
 #include "checker_bonus.h"
 
-bool  check_only_digit(char *str)
+bool	check_only_digit(char *str)
 {
-    size_t  i;
+	size_t	i;
 
-    i = 0;
+	i = 0;
 	if (str == NULL || str[i] == '\0')
 		return (false);
 	if (str[i] == '+' || str[i] == '-')
 		i++;
 	if (str[i] == '\0' || (str[i] == '0' && str[i + 1] != '\0'))
 		return (false);
-    while (str[i]) 
-    {   
-        if (ft_isdigit(str[i]) == 0)
-            return (false);
-        i++;    
-    }       
-    return (true);
+	while (str[i])
+	{
+		if (ft_isdigit(str[i]) == 0)
+			return (false);
+		i++;
+	}
+	return (true);
 }
 
 bool	is_integer(const char *str)
 {
 	long long	decimal;
-	int	sign;
+	int			sign;
 
 	decimal = 0;
 	sign = 1;
@@ -46,8 +46,8 @@ bool	is_integer(const char *str)
 bool	args_error_check(int argc, char **argv)
 {
 	char	**split_argv;
-	int	i;
-	int	j;
+	int		i;
+	int		j;
 	bool	flag;
 
 	flag = true;

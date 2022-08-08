@@ -2,9 +2,9 @@
 
 int	find_from_top(t_stack *stack, int chunk_min, int chunk_size)
 {
-	int	i;
-	int	chunk_max;
-	t_stack *sentinel;
+	int		i;
+	int		chunk_max;
+	t_stack	*sentinel;
 
 	sentinel = stack;
 	i = 0;
@@ -19,12 +19,11 @@ int	find_from_top(t_stack *stack, int chunk_min, int chunk_size)
 	return (i);
 }
 
-
 int	find_from_bottom(t_stack *stack, int chunk_min, int chunk_size)
 {
-	int	i;
-	int	chunk_max;
-	t_stack *sentinel;
+	int		i;
+	int		chunk_max;
+	t_stack	*sentinel;
 
 	sentinel = stack;
 	i = 0;
@@ -46,7 +45,7 @@ void	push_chunk(t_listack *stack, int size, int chunk_min, int one_chunk)
 	int	i;
 	int	chunk_size;
 
-	i = 0; 
+	i = 0;
 	chunk_size = size - chunk_min;
 	if (chunk_size > one_chunk)
 		chunk_size = one_chunk;
@@ -64,14 +63,17 @@ void	push_chunk(t_listack *stack, int size, int chunk_min, int one_chunk)
 		i++;
 	}
 }
+
 void	push_from_bigger(t_listack *stack, int size)
 {
 	int	rb_index;
 	int	rrb_index;
-	int sa_flag = 0;
-	int	rra_flag = 0;
-	int i;
+	int	sa_flag;
+	int	rra_flag;
+	int	i;
 
+	sa_flag = 0;
+	rra_flag = 0;
 	rb_index = front_max_val_index(stack->b, size);
 	rrb_index = back_max_val_index(stack->b, size);
 	mult_rb_rrb(stack, rb_index, rrb_index, stack->order);
@@ -80,10 +82,10 @@ void	push_from_bigger(t_listack *stack, int size)
 	while (i < size - 1)
 	{
 		rb_index = get_near_rb_index(stack->a, stack->b, sa_flag, rra_flag);
-        rrb_index = get_near_rrb_index(stack->a, stack->b, sa_flag, rra_flag);
+		rrb_index = get_near_rrb_index(stack->a, stack->b, sa_flag, rra_flag);
 		mult_rb_rrb(stack, rb_index, rrb_index, stack->order);
 		pa(stack, stack->order);
-		receive_proc(stack, &sa_flag, &rra_flag, stack->order);
+		receiv_proc(stack, &sa_flag, &rra_flag, stack->order);
 		i++;
 	}
 }

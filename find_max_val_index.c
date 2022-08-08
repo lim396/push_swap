@@ -2,8 +2,8 @@
 
 int	front_max_val_index(t_stack *stack, int size)
 {
-	int	i;
-	t_stack *sentinel;
+	int		i;
+	t_stack	*sentinel;
 
 	sentinel = stack;
 	i = 0;
@@ -19,8 +19,8 @@ int	front_max_val_index(t_stack *stack, int size)
 
 int	back_max_val_index(t_stack *stack, int size)
 {
-	int	i;
-	t_stack *sentinel;
+	int		i;
+	t_stack	*sentinel;
 
 	sentinel = stack;
 	i = 0;
@@ -31,5 +31,5 @@ int	back_max_val_index(t_stack *stack, int size)
 		stack = stack->prev;
 		i++;
 	}
-	return (i + 1);	
+	return (i + 1);
 }

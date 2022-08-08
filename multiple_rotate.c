@@ -6,10 +6,10 @@ void	multiple_rotate_a(t_listack *stack, int r_index, t_olist *order)
 		ra(stack, order);
 }
 
-void	multiple_reverse_rotate_a(t_listack *stack, int rr_index, t_olist *order)
+void	multiple_reverse_rotate_a(t_listack *st, int rr_index, t_olist *order)
 {
 	while (rr_index--)
-		rra(stack, order);
+		rra(st, order);
 }
 
 void	multiple_rotate_b(t_listack *stack, int r_index, t_olist *order)
@@ -18,10 +18,10 @@ void	multiple_rotate_b(t_listack *stack, int r_index, t_olist *order)
 		rb(stack, order);
 }
 
-void	multiple_reverse_rotate_b(t_listack *stack, int rr_index, t_olist *order)
+void	multiple_reverse_rotate_b(t_listack *st, int rr_index, t_olist *order)
 {
 	while (rr_index--)
-		rrb(stack, order);
+		rrb(st, order);
 }
 
 void	mult_rb_rrb(t_listack *b, int rb_index, int rrb_index, t_olist *order)
