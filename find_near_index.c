@@ -41,11 +41,9 @@ int	bottom_near(t_stack *stack, int find_val1, int find_val2, int find_val3)
 int get_near_rb_index(t_stack *a, t_stack *b, int sa_flag, int rra_flag)
 {
     int a_top_val;
-    int a_bottom_val;
     int rb_index;
 
     a_top_val = a->next->val;
-    a_bottom_val = a->prev->val;
     if (rra_flag == 1 && sa_flag == 0)
         rb_index = top_near(b, a_top_val - 1, a_top_val - 2, -3);
     else if (sa_flag == 1 && rra_flag == 0)
@@ -61,11 +59,9 @@ int get_near_rb_index(t_stack *a, t_stack *b, int sa_flag, int rra_flag)
 int get_near_rrb_index(t_stack *a, t_stack *b, int sa_flag, int rra_flag)
 {
     int a_top_val;
-    int a_bottom_val;
     int rrb_index;
 
     a_top_val = a->next->val;
-    a_bottom_val = a->prev->val;
     if (rra_flag == 1 && sa_flag == 0)
         rrb_index = bottom_near(b, a_top_val - 1, a_top_val - 2, -3);
     else if (sa_flag == 1 && rra_flag == 0)

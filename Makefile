@@ -26,7 +26,7 @@ M_SRCS= push_swap.c \
 		stack_free.c \
 		swap.c 
 
-B_SRCS= checker.c \
+B_SRCS= checker_bonus.c \
 		get_next_line.c \
 		get_next_line_utils.c \
 		coordinate_compression_bonus.c \

@@ -19,8 +19,8 @@ bool  check_only_digit(char *str)
     size_t  i;
 
     i = 0;
-    if (str == NULL || str[i] == '\0')
-        return (false);
+	if (str == NULL || str[i] == '\0')
+		return (false);
 	if (str[i] == '+' || str[i] == '-')
 		i++;
 	if (str[i] == '\0' || (str[i] == '0' && str[i + 1] != '\0'))
@@ -62,24 +62,25 @@ bool	args_error_check(int argc, char **argv)
 	char	**split_argv;
 	int	i;
 	int	j;
+	bool	flag;
 
+	flag = true;
 	if (argc < 2)
 		exit(0);
 	i = 1;
 	while (argv[i] != NULL)
 	{
-		split_argv = ft_split(argv[i], ' ');
+		split_argv = ft_split(argv[i++], ' ');
 		if (split_argv == NULL)
 			return (false);
 		j = 0;
 		while (split_argv[j] != NULL)
 		{
 			if (!check_only_digit(split_argv[j]) || !is_integer(split_argv[j]))
-				return (false);
+				flag = false;
 			j++;
 		}
 		all_free(split_argv, j);
-		i++;
 	}
-	return (true);
+	return (flag);
 }
