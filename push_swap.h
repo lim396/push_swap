@@ -1,17 +1,56 @@
-#ifdef PUSH_SWAP_H
+#ifndef PUSH_SWAP_H
 # define PUSH_SWAP_H
 
 # include <unistd.h>
 # include <stdlib.h>
 # include <stddef.h>
+# include <stddef.h>
+# include <stdbool.h>
+# include <limits.h>
+# include "libft/libft.h"
 
-typedef struct s_list	t_list;
-struct s_list
+# define SENTINEL 0
+# define TOP 1
+# define BOTTOM -1
+# define ONE_CHUNK_SIZE 30
+
+typedef enum e_okind
 {
-	t_list	*prev;
-	t_list	*next;
+	O_NO,
+	O_PA,
+	O_PB,
+	O_SA,
+	O_SB,
+	O_RA,
+	O_RB,
+	O_RRA,
+	O_RRB,
+} t_okind;
+
+typedef struct s_olist	t_olist;
+struct s_olist
+{
+	t_olist	*next;
+	t_olist	*prev;
+	t_okind	kind;
+};
+
+typedef struct s_stack	t_stack;
+struct s_stack
+{
+	t_stack	*prev;
+	t_stack	*next;
 	int		val;
-}
+};
+
+typedef struct s_listack	t_listack;
+struct s_listack
+{
+	t_stack	*a;
+	t_stack	*b;
+	t_olist	*order;
+};
+
 
 int		count_elem(char **argv);
 int		*create_arry(char **argv, int size);
@@ -80,7 +119,9 @@ void    push_chunk(t_listack *stack, int size, int chunk_min, int one_chunk);
 void	push_from_bigger(t_listack *stack, int size);
 void	medium_rare_sort(t_listack *stack, int size);
 
-void	push_swap(t_listack *stack, int size);
+//void	push_swap(t_listack *stack, int size);
+//int		main(int argc, char **argv);
+
 
 bool	is_sorted(t_stack *stack);
 bool	check_only_digit(char *str);
