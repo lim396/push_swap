@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -g -Wall -Wextra -Werror
 
 NAME = push_swap
-CHECKER = _checker
+CHECKER = checker
 M_HEADER = push_swap.h
 B_HEADER = checker_bonus.h
 LIBFT= ./libft/libft.a
