@@ -35,12 +35,23 @@ bool	is_integer(const char *str)
 	while ('0' <= *str && *str <= '9')
 	{
 		if ((sign * decimal > (INT_MAX - (*str - '0')) / 10)
-			|| sign * decimal < (INT_MIN + (*str - '0') / 10))
+			|| (sign * decimal < (INT_MIN + (*str - '0')) / 10))
 			return (false);
 		decimal = (decimal * 10) + (*str - '0');
 		str++;
 	}
 	return (true);
+}
+
+static bool	args_error_check_helper(int flag, int *j, char **split_argv)
+{
+	while (split_argv[*j] != NULL)
+	{
+		if (!check_only_digit(split_argv[*j]) || !is_integer(split_argv[*j]))
+			flag = false;
+		(*j)++;
+	}
+	return (flag);
 }
 
 bool	args_error_check(int argc, char **argv)
@@ -54,18 +65,15 @@ bool	args_error_check(int argc, char **argv)
 	if (argc < 2)
 		exit(0);
 	i = 1;
-	while (argv[i] != NULL)
+	while (i < argc)
 	{
 		split_argv = ft_split(argv[i++], ' ');
 		if (split_argv == NULL)
 			return (false);
 		j = 0;
-		while (split_argv[j] != NULL)
-		{
-			if (!check_only_digit(split_argv[j]) || !is_integer(split_argv[j]))
-				flag = false;
-			j++;
-		}
+		if (split_argv[j] == NULL)
+			flag = false;
+		flag = args_error_check_helper(flag, &j, split_argv);
 		all_free(split_argv, j);
 	}
 	return (flag);

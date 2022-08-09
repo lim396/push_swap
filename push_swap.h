@@ -57,7 +57,6 @@ int		*create_arry(char **argv, int size);
 void	bubble_sort(int *arry, int size);
 int		*dup_arry(int *origin, int size);
 bool	is_overlap(int *arry, int size);
-void	compression_helper(int *arry, int *sorted_arry, int size);
 void	coordinate_compression(int *arry, int size);
 
 bool	is_only_sentinel(t_stack *stack);

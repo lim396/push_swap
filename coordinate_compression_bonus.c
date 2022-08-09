@@ -64,7 +64,7 @@ bool	is_overlap(int *arry, int size)
 	return (false);
 }
 
-void	compression_helper(int *arry, int *sorted_arry, int size)
+static void	compression_helper(int *arry, int *sorted_arry, int size)
 {
 	int	i;
 	int	j;
