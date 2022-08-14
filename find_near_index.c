@@ -45,11 +45,11 @@ int	get_near_rb_index(t_stack *a, t_stack *b, int sa_flag, int rra_flag)
 
 	a_top_val = a->next->val;
 	if (rra_flag == 1 && sa_flag == 0)
-		rb_index = top_near(b, a_top_val - 1, a_top_val - 2, -3);
+		rb_index = top_near(b, a_top_val - 1, a_top_val - 2, NONE);
 	else if (sa_flag == 1 && rra_flag == 0)
-		rb_index = top_near(b, a_top_val + 1, a_top_val - 1, -3);
+		rb_index = top_near(b, a_top_val + 1, a_top_val - 1, NONE);
 	else if (sa_flag == 1 && rra_flag == 1)
-		rb_index = top_near(b, a_top_val + 1, -3, -3);
+		rb_index = top_near(b, a_top_val + 1, NONE, NONE);
 	else
 		rb_index = top_near(b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
 	return (rb_index);
@@ -62,11 +62,11 @@ int	get_near_rrb_index(t_stack *a, t_stack *b, int sa_flag, int rra_flag)
 
 	a_top_val = a->next->val;
 	if (rra_flag == 1 && sa_flag == 0)
-		rrb_index = bottom_near(b, a_top_val - 1, a_top_val - 2, -3);
+		rrb_index = bottom_near(b, a_top_val - 1, a_top_val - 2, NONE);
 	else if (sa_flag == 1 && rra_flag == 0)
-		rrb_index = bottom_near(b, a_top_val + 1, a_top_val - 1, -3);
+		rrb_index = bottom_near(b, a_top_val + 1, a_top_val - 1, NONE);
 	else if (sa_flag == 1 && rra_flag == 1)
-		rrb_index = bottom_near(b, a_top_val + 1, -3, -3);
+		rrb_index = bottom_near(b, a_top_val + 1, NONE, NONE);
 	else
 		rrb_index = bottom_near(b, a_top_val - 1, a_top_val - 2, a_top_val - 3);
 	return (rrb_index);

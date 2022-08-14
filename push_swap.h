@@ -12,6 +12,7 @@
 # define SENTINEL 0
 # define TOP 1
 # define BOTTOM -1
+# define NONE -3
 # define ONE_CHUNK_SIZE 30
 
 typedef enum e_okind
@@ -113,7 +114,7 @@ void	receiv_proc(t_listack *st, int *sa_flag, int *rra_flag, t_olist *order);
 int		find_from_top(t_stack *stack, int chunk_min, int chunk_size);
 int		find_from_bottom(t_stack *stack, int chunk_min, int chunk_size);
 void	push_chunk(t_listack *stack, int size, int chunk_min, int one_chunk);
-void	push_from_bigger(t_listack *stack, int size);
+void	push_from_larger(t_listack *stack, int size);
 void	medium_rare_sort(t_listack *stack, int size);
 
 bool	is_sorted(t_stack *stack);

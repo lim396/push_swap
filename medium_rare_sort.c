@@ -64,7 +64,7 @@ void	push_chunk(t_listack *stack, int size, int chunk_min, int one_chunk)
 	}
 }
 
-void	push_from_bigger(t_listack *stack, int size)
+void	push_from_larger(t_listack *stack, int size)
 {
 	int	rb_index;
 	int	rrb_index;
@@ -105,5 +105,5 @@ void	medium_rare_sort(t_listack *stack, int size)
 		push_chunk(stack, size, chunk_min, one_chunk);
 		chunk_min += one_chunk;
 	}
-	push_from_bigger(stack, size);
+	push_from_larger(stack, size);
 }
