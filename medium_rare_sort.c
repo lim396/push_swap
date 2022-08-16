@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   medium_rare_sort.c                                 :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: shongou <shongou@student.42tokyo.jp>       +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/08/16 16:21:31 by shongou           #+#    #+#             */
+/*   Updated: 2022/08/16 16:21:33 by shongou          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "push_swap.h"
 
 int	find_from_top(t_stack *stack, int chunk_min, int chunk_size)
@@ -29,7 +41,7 @@ int	find_from_bottom(t_stack *stack, int chunk_min, int chunk_size)
 	i = 0;
 	chunk_max = chunk_min + chunk_size - 1;
 	while (stack->prev != sentinel)
-	{		
+	{
 		if (chunk_min <= stack->prev->val && stack->prev->val <= chunk_max)
 			break ;
 		i++;
