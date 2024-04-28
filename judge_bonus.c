@@ -43,7 +43,7 @@ int	measure_stack(t_stack *stack)
 
 void	judge_sort(t_stack *stack_a, t_stack *stack_b)
 {
-	if (is_sorted(stack_a) || measure_stack(stack_b) == 0)
+	if (is_sorted(stack_a) && measure_stack(stack_b) == 0)
 		ft_putstr_fd("OK\n", 1);
 	else
 		ft_putstr_fd("KO\n", 1);
